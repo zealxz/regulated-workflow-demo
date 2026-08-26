@@ -11,6 +11,7 @@ from regulated_workflow.workflows import run_diff, run_extract
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SAMPLES = PROJECT_ROOT / "samples"
+PDF_FIXTURE = SAMPLES / "pdf" / "synthetic-policy.pdf"
 
 
 class WorkflowTests(unittest.TestCase):
@@ -48,6 +49,29 @@ class WorkflowTests(unittest.TestCase):
             ]
             self.assertEqual("offline", audit_records[0]["network_mode"])
             self.assertNotIn("quote", (output_dir / "audit.jsonl").read_text("utf-8"))
+
+    def test_extracts_real_synthetic_pdf_through_offline_workflow(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_dir = Path(temp_dir) / "pdf-extract"
+
+            run_extract(PDF_FIXTURE, output_dir)
+
+            evidence = json.loads((output_dir / "evidence.json").read_text("utf-8"))
+            fields = {item["field"]: item for item in evidence}
+            self.assertEqual("SYN-PDF-001", fields["Policy ID"]["value"])
+            self.assertEqual("Quality Operations", fields["Owner"]["value"])
+            self.assertEqual("6", fields["Review Cycle Months"]["value"])
+            self.assertTrue(all(item["page"] == 1 for item in evidence))
+
+            audit_records = [
+                json.loads(line)
+                for line in (output_dir / "audit.jsonl").read_text("utf-8").splitlines()
+            ]
+            parsed = [
+                item for item in audit_records if item["event"] == "document_parsed"
+            ]
+            self.assertEqual("pdf", parsed[0]["format"])
+            self.assertEqual("synthetic-policy.pdf", parsed[0]["source_id"])
 
     def test_diff_flags_synthetic_regulated_changes_for_review(self):
         with tempfile.TemporaryDirectory() as temp_dir:

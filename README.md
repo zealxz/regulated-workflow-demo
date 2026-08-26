@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/zealxz/regulated-workflow-demo/actions/workflows/tests.yml/badge.svg)](https://github.com/zealxz/regulated-workflow-demo/actions/workflows/tests.yml)
 
-Turn PDFs, spreadsheets, and controlled-document versions into source-linked evidence registers and review queues—local-first, with human approval.
+Turn PDFs, CSV tables, and controlled-document versions into source-linked evidence registers and review queues—local-first, with human approval. Excel workbooks are review outputs, not input files.
 
 ## Seven-Day Fixed-Scope Pilot
 
@@ -12,6 +12,11 @@ The first two pilots are `$149` / `¥999`:
 - **up to 20 representative documents or 500 rows**
 - **one extraction, validation, or comparison workflow**
 - **one structured output and one human approval point**
+
+Choose one buyer-ready result:
+
+- **Evidence extraction:** PDF, text, JSON, or CSV input → `evidence.xlsx` + `review_queue.csv`.
+- **Controlled change review:** old/new document snapshots → `changes.xlsx` + approval-ready `summary.md`.
 
 The pilot also includes one bounded correction round, deployment notes, and seven days of defect support. The workflow is client-owned and runs in the client's environment.
 
@@ -23,7 +28,7 @@ The pilot also includes one bounded correction round, deployment notes, and seve
 
 ## 中文服务简介
 
-把 PDF、表格和版本文档转成带来源定位的证据台账、差异清单与人工复核队列。首两单为 7 日固定范围试点，价格 `¥999`：最多 20 份文档或 500 行、一个流程、一个结构化输出、一个人工审批点、一次限定修正和 7 天缺陷支持。演示全部使用合成数据，不冒充客户案例，不作合规结论。
+把 PDF、CSV 表格和版本文档转成带来源定位的证据台账、差异清单与人工复核队列；Excel 是复核输出，不是输入格式。首两单为 7 日固定范围试点，价格 `¥999`：最多 20 份文档或 500 行、一个流程、一个结构化输出、一个人工审批点、一次限定修正和 7 天缺陷支持。演示全部使用合成数据，不冒充客户案例，不作合规结论。
 
 [查看可下载样例](#verified-sample-outputs) · [通过 Upwork 购买或沟通](https://www.upwork.com/services/product/development-it-a-7-day-auditable-document-workflow-automation-sprint-2092293814461481436) · [公开咨询](https://github.com/zealxz/regulated-workflow-demo/issues/new?template=pilot-inquiry.yml)
 
@@ -36,6 +41,7 @@ The pilot also includes one bounded correction round, deployment notes, and seve
 ## What This Demo Proves
 
 - `extract`: local TXT, Markdown, CSV, JSON, and optional PDF → source-linked evidence register and review queue.
+- The optional PDF path has a real, single-page synthetic extraction fixture and regression test in CI.
 - `diff`: two local snapshots → explainable old/new changes and review priority.
 - Canonical JSON plus CSV, Markdown, JSONL, and formatted Excel outputs.
 - Stable source IDs, hashes, explicit offline audit events, and spreadsheet-formula-injection protection.
