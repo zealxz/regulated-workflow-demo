@@ -55,6 +55,11 @@ def build_parser() -> argparse.ArgumentParser:
             "omit when age_hours is supplied"
         ),
     )
+    leads_parser.add_argument(
+        "--suppressions",
+        type=Path,
+        help="optional CSV of lead_id and non-personal reason values that must not receive drafts",
+    )
 
     v2ex_parser = subparsers.add_parser(
         "v2ex-discover",
@@ -88,6 +93,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 args.input,
                 args.output_dir,
                 as_of=args.as_of,
+                suppressions_path=args.suppressions,
             )
         else:
             path = run_v2ex_discovery(args.output, max_topics=args.max_topics)

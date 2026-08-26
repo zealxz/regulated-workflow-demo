@@ -103,7 +103,7 @@ Unsupported files inside a directory are ignored. An explicitly supplied unsuppo
 
 ## Developer Utilities
 
-The repository also includes a review-only lead-ranking CLI and a bounded, contact-redacted public V2EX discovery command. They are deliberately separated from the buyer-facing demo; see [`docs/acquisition-tools.md`](docs/acquisition-tools.md) for their commands, schemas, and safety boundaries.
+The repository also includes a review-only lead-ranking CLI with stable-ID suppression and a bounded, contact-redacted public V2EX discovery command. They are deliberately separated from the buyer-facing demo; see [`docs/acquisition-tools.md`](docs/acquisition-tools.md) for their commands, schemas, and safety boundaries.
 
 ## Optional Counts-Only LLM Draft
 

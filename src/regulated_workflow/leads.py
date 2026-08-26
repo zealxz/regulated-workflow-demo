@@ -43,6 +43,8 @@ RANKED_LEAD_FIELDS = (
 )
 
 _REQUIRED_COLUMNS = {"lead_id", "channel", "title", "description"}
+_SUPPRESSION_REQUIRED_COLUMNS = {"lead_id", "reason"}
+_SUPPRESSION_GATE_NOTE = "suppressed by operator-provided lead_id list"
 _CHANNEL_ALIASES = {
     "upwork": "upwork",
     "v2ex": "v2ex",
@@ -161,6 +163,7 @@ class ScoredLead:
     score: int
     qualified: bool
     qualification_notes: str
+    suppression_reason: str = ""
 
     @property
     def draft_type(self) -> str:
@@ -173,6 +176,7 @@ def run_lead_assistant(
     input_path: Path,
     output_dir: Path,
     as_of: Optional[str] = None,
+    suppressions_path: Optional[Path] = None,
 ) -> Sequence[Path]:
     """Rank a manually supplied CSV and create drafts without any network action."""
     input_path = input_path.expanduser()
@@ -182,6 +186,17 @@ def run_lead_assistant(
     if input_path.suffix.casefold() != ".csv":
         raise InputError("lead input must be a .csv file")
 
+    if suppressions_path is not None:
+        suppressions_path = suppressions_path.expanduser()
+        if not suppressions_path.is_file():
+            raise InputError(
+                "suppression input is not a readable CSV file: %s" % suppressions_path
+            )
+        if suppressions_path.suffix.casefold() != ".csv":
+            raise InputError("suppression input must be a .csv file")
+        if suppressions_path.resolve() == input_path.resolve():
+            raise InputError("lead input and suppression input must be different files")
+
     output_names = {
         "ranked_leads.csv",
         "upwork_proposals.md",
@@ -190,15 +205,29 @@ def run_lead_assistant(
         "audit.jsonl",
     }
     resolved_input = input_path.resolve()
-    if any(
-        resolved_input == (output_dir / output_name).resolve()
-        for output_name in output_names
-    ):
+    resolved_outputs = {
+        (output_dir / output_name).resolve() for output_name in output_names
+    }
+    if resolved_input in resolved_outputs:
         raise InputError("output would overwrite the lead input file: %s" % input_path)
+    if (
+        suppressions_path is not None
+        and suppressions_path.resolve() in resolved_outputs
+    ):
+        raise InputError(
+            "output would overwrite the suppression input file: %s"
+            % suppressions_path
+        )
 
     parsed_as_of = _parse_datetime(as_of, "--as-of") if as_of else datetime.now(timezone.utc)
+    suppressions = (
+        _read_suppressions(suppressions_path) if suppressions_path is not None else {}
+    )
     leads = _read_leads(input_path, parsed_as_of)
-    scored = [_score_lead(lead) for lead in leads]
+    scored = [
+        _score_lead(lead, suppressions.get(lead.lead_id.casefold(), ""))
+        for lead in leads
+    ]
     ranked = sorted(
         scored,
         key=lambda item: (
@@ -224,33 +253,48 @@ def run_lead_assistant(
     write_text(summary_path, _summary(ranked))
     input_bytes = input_path.read_bytes()
     timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    write_jsonl(
-        audit_path,
-        (
-            {
-                "event": "lead_ranking_started",
-                "timestamp": timestamp,
-                "input_sha256": hashlib.sha256(input_bytes).hexdigest(),
-                "lead_count": len(ranked),
-                "as_of": parsed_as_of.isoformat().replace("+00:00", "Z"),
-                "scoring_version": 1,
-                "network_mode": "offline",
-            },
-            {
-                "event": "lead_ranking_completed",
-                "timestamp": timestamp,
-                "qualified_count": sum(item.qualified for item in ranked),
-                "upwork_draft_count": sum(
-                    item.draft_type == "upwork_english" for item in ranked
-                ),
-                "domestic_draft_count": sum(
-                    item.draft_type == "domestic_chinese" for item in ranked
-                ),
-                "external_action_performed": False,
-                "human_review_required": True,
-            },
-        ),
+    started_event: Dict[str, Any] = {
+        "event": "lead_ranking_started",
+        "timestamp": timestamp,
+        "input_sha256": hashlib.sha256(input_bytes).hexdigest(),
+        "lead_count": len(ranked),
+        "as_of": parsed_as_of.isoformat().replace("+00:00", "Z"),
+        "scoring_version": 2,
+        "network_mode": "offline",
+        "suppression_entry_count": len(suppressions),
+    }
+    if suppressions_path is not None:
+        started_event["suppression_input_sha256"] = hashlib.sha256(
+            suppressions_path.read_bytes()
+        ).hexdigest()
+    suppressed = [item for item in ranked if item.suppression_reason]
+    audit_records: List[Dict[str, Any]] = [started_event]
+    audit_records.extend(
+        {
+            "event": "lead_suppressed",
+            "timestamp": timestamp,
+            "lead_id": item.lead.lead_id,
+            "reason": item.suppression_reason,
+        }
+        for item in suppressed
     )
+    audit_records.append(
+        {
+            "event": "lead_ranking_completed",
+            "timestamp": timestamp,
+            "qualified_count": sum(item.qualified for item in ranked),
+            "suppressed_count": len(suppressed),
+            "upwork_draft_count": sum(
+                item.draft_type == "upwork_english" for item in ranked
+            ),
+            "domestic_draft_count": sum(
+                item.draft_type == "domestic_chinese" for item in ranked
+            ),
+            "external_action_performed": False,
+            "human_review_required": True,
+        }
+    )
+    write_jsonl(audit_path, audit_records)
     return (ranked_path, upwork_path, domestic_path, summary_path, audit_path)
 
 
@@ -302,6 +346,66 @@ def _read_leads(input_path: Path, as_of: datetime) -> List[Lead]:
     if not leads:
         raise InputError("lead CSV contains no lead rows")
     return leads
+
+
+def _read_suppressions(input_path: Path) -> Dict[str, str]:
+    """Read only stable IDs and non-personal operational reasons."""
+    try:
+        handle = input_path.open(encoding="utf-8-sig", newline="")
+    except (OSError, UnicodeError) as exc:
+        raise InputError("cannot read suppression CSV: %s" % exc) from exc
+
+    try:
+        with handle:
+            reader = csv.DictReader(handle)
+            if not reader.fieldnames:
+                raise InputError("suppression CSV must contain a header row")
+            headers = [header.strip() if header else "" for header in reader.fieldnames]
+            if len(set(headers)) != len(headers):
+                raise InputError("suppression CSV contains duplicate column names")
+            missing = sorted(_SUPPRESSION_REQUIRED_COLUMNS - set(headers))
+            if missing:
+                raise InputError(
+                    "suppression CSV is missing required columns: %s"
+                    % ", ".join(missing)
+                )
+            reader.fieldnames = headers
+            suppressions: Dict[str, str] = {}
+            for row_number, raw_row in enumerate(reader, start=2):
+                row = {
+                    key: (value or "").strip()
+                    for key, value in raw_row.items()
+                    if key in _SUPPRESSION_REQUIRED_COLUMNS
+                }
+                if not any(row.values()):
+                    continue
+                lead_id = row.get("lead_id", "")
+                reason = " ".join(row.get("reason", "").split())
+                if not lead_id:
+                    raise InputError(
+                        "suppression CSV row %d has an empty lead_id" % row_number
+                    )
+                if not reason:
+                    raise InputError(
+                        "suppression CSV row %d has an empty reason" % row_number
+                    )
+                if len(reason) > 200:
+                    raise InputError(
+                        "suppression CSV row %d reason exceeds 200 characters"
+                        % row_number
+                    )
+                folded_id = lead_id.casefold()
+                if folded_id in suppressions:
+                    raise InputError(
+                        "suppression CSV row %d duplicates lead_id %r"
+                        % (row_number, lead_id)
+                    )
+                suppressions[folded_id] = reason
+    except (UnicodeError, csv.Error) as exc:
+        raise InputError("cannot parse suppression CSV: %s" % exc) from exc
+    if not suppressions:
+        raise InputError("suppression CSV contains no suppression rows")
+    return suppressions
 
 
 def _parse_lead(row: Mapping[str, str], row_number: int, as_of: datetime) -> Lead:
@@ -433,7 +537,7 @@ def _parse_accepting_outreach(value: str, row_number: int) -> Optional[bool]:
     raise InputError("lead CSV row %d has invalid accepting_outreach" % row_number)
 
 
-def _score_lead(lead: Lead) -> ScoredLead:
+def _score_lead(lead: Lead, suppression_reason: str = "") -> ScoredLead:
     haystack = "%s\n%s" % (lead.title.casefold(), lead.description.casefold())
     themes = tuple(
         theme
@@ -475,6 +579,9 @@ def _score_lead(lead: Lead) -> ScoredLead:
     qualified = all(passed for passed, _ in gates)
     passed_labels = [label for passed, label in gates if passed]
     failed_labels = [label for passed, label in gates if not passed]
+    if suppression_reason:
+        failed_labels.append(_SUPPRESSION_GATE_NOTE)
+        qualified = False
     note_parts = []
     if passed_labels:
         note_parts.append("passed: %s" % "; ".join(passed_labels))
@@ -482,6 +589,8 @@ def _score_lead(lead: Lead) -> ScoredLead:
         note_parts.append("failed: %s" % "; ".join(failed_labels))
     if lead.accepting_outreach is None:
         note_parts.append("outreach availability: unknown")
+    if suppression_reason:
+        note_parts.append("suppression reason: %s" % suppression_reason)
     notes = " | ".join(note_parts)
     return ScoredLead(
         lead=lead,
@@ -496,6 +605,7 @@ def _score_lead(lead: Lead) -> ScoredLead:
         score=score,
         qualified=qualified,
         qualification_notes=notes,
+        suppression_reason=suppression_reason,
     )
 
 
@@ -680,6 +790,8 @@ def _summary(ranked: Sequence[ScoredLead]) -> str:
             "",
             "- Leads scored: %d" % len(ranked),
             "- Qualified for a draft: %d" % len(qualified),
+            "- Suppressed by operator list: %d"
+            % sum(bool(item.suppression_reason) for item in ranked),
             "- Upwork English drafts: %d"
             % sum(item.draft_type == "upwork_english" for item in ranked),
             "- Domestic Chinese drafts: %d"
@@ -691,6 +803,7 @@ def _summary(ranked: Sequence[ScoredLead]) -> str:
             "- Upwork requires age <= 2 hours, proposals < 20, verified payment, and at least two demo-match themes.",
             "- Domestic channels require at least two demo-match themes; recency still increases rank, while proposals and payment are treated as not applicable when blank.",
             "- Ranking places qualified leads first, then sorts by score, recency, and stable lead ID.",
+            "- A supplied suppression list overrides qualification by stable lead ID without deleting the ranked row.",
             "- Match themes are deterministic keyword groups: document, auditability, automation, and AI/retrieval.",
             "",
             "## Human Boundary",

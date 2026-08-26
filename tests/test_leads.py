@@ -1,10 +1,13 @@
 import csv
+import contextlib
+import io
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
 from regulated_workflow.errors import InputError
+from regulated_workflow.cli import main
 from regulated_workflow.leads import count_english_words, run_lead_assistant
 
 
@@ -182,6 +185,105 @@ class LeadAssistantTests(unittest.TestCase):
             self.assertEqual("false", row["qualified"])
             self.assertEqual("false", row["accepting_outreach"])
             self.assertIn("failed: outreach is not explicitly closed", row["qualification_notes"])
+
+    def test_suppressed_lead_stays_ranked_but_never_generates_a_draft(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            suppressions_path = root / "suppressions.csv"
+            suppressions_path.write_text(
+                "lead_id,reason,ignored_private_column\n"
+                "VX-001,request explicitly closed,do not copy this\n",
+                encoding="utf-8",
+            )
+            output_dir = root / "output"
+
+            run_lead_assistant(
+                SAMPLE,
+                output_dir,
+                suppressions_path=suppressions_path,
+            )
+
+            with (output_dir / "ranked_leads.csv").open(
+                encoding="utf-8", newline=""
+            ) as handle:
+                rows = list(csv.DictReader(handle))
+            row = next(row for row in rows if row["lead_id"] == "VX-001")
+            self.assertEqual("false", row["qualified"])
+            self.assertEqual("none", row["draft_type"])
+            self.assertIn(
+                "suppressed by operator-provided lead_id list",
+                row["qualification_notes"],
+            )
+            self.assertIn(
+                "suppression reason: request explicitly closed",
+                row["qualification_notes"],
+            )
+            self.assertNotIn("VX\\-001", (output_dir / "domestic_messages.md").read_text("utf-8"))
+
+            audit = [
+                json.loads(line)
+                for line in (output_dir / "audit.jsonl").read_text("utf-8").splitlines()
+            ]
+            suppressed_event = next(
+                event for event in audit if event["event"] == "lead_suppressed"
+            )
+            self.assertEqual(
+                {
+                    "event",
+                    "timestamp",
+                    "lead_id",
+                    "reason",
+                },
+                set(suppressed_event),
+            )
+            self.assertEqual("request explicitly closed", suppressed_event["reason"])
+            self.assertNotIn("do not copy this", json.dumps(audit))
+            self.assertEqual(1, audit[-1]["suppressed_count"])
+
+    def test_cli_suppression_reason_cannot_become_a_spreadsheet_formula(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            suppressions_path = root / "suppressions.csv"
+            suppressions_path.write_text(
+                "lead_id,reason\n"
+                'VX-001,"=HYPERLINK(""https://example.invalid"")"\n',
+                encoding="utf-8",
+            )
+            output_dir = root / "output"
+
+            with contextlib.redirect_stdout(io.StringIO()):
+                code = main(
+                    [
+                        "leads",
+                        str(SAMPLE),
+                        "--output-dir",
+                        str(output_dir),
+                        "--suppressions",
+                        str(suppressions_path),
+                    ]
+                )
+
+            self.assertEqual(0, code)
+            with (output_dir / "ranked_leads.csv").open(
+                encoding="utf-8", newline=""
+            ) as handle:
+                rows = list(csv.DictReader(handle))
+            row = next(row for row in rows if row["lead_id"] == "VX-001")
+            self.assertFalse(row["qualification_notes"].lstrip().startswith("="))
+            self.assertIn("=HYPERLINK", row["qualification_notes"])
+
+    def test_rejects_suppression_csv_without_reason(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            suppressions_path = root / "suppressions.csv"
+            suppressions_path.write_text("lead_id\nVX-001\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(InputError, "missing required columns: reason"):
+                run_lead_assistant(
+                    SAMPLE,
+                    root / "output",
+                    suppressions_path=suppressions_path,
+                )
 
 
 if __name__ == "__main__":

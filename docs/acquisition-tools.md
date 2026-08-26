@@ -18,6 +18,16 @@ PYTHONPATH=src python3 -m regulated_workflow leads leads.csv \
   --as-of 2026-08-26T12:00:00+08:00
 ```
 
+To prevent a previously closed, unsafe, or permanently excluded stable lead ID from producing another draft, supply a separate suppression CSV:
+
+```bash
+PYTHONPATH=src python3 -m regulated_workflow leads leads.csv \
+  --output-dir outputs/leads \
+  --suppressions lead-suppressions.csv
+```
+
+The suppression CSV requires unique, non-empty `lead_id,reason` rows. Additional columns are ignored and IDs match case-insensitively. Keep reasons short, operational, and non-personal—for example `request closed` or `outside safe scope`. A suppressed row stays visible with its original score in `ranked_leads.csv`, but is forced to `qualified=false` and `draft_type=none`; the stable ID and reason are recorded in the minimized audit trail and never copied into a message draft. CSV output retains spreadsheet-formula-injection protection.
+
 Input columns:
 
 | Column | Rule |
