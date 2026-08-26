@@ -34,13 +34,13 @@ Input columns:
 | --- | --- |
 | `lead_id`, `channel`, `title`, `description` | Required for every row. IDs must be unique. |
 | `age_hours` or `published_at` | At least one is required. `age_hours` takes precedence; timestamps must include a timezone. |
-| `proposals`, `payment_verified` | Required for Upwork; optional for domestic/public channels. Proposal ranges are interpreted conservatively. |
+| `proposals`, `payment_verified` | Required for Upwork; optional for domestic/public channels. When supplied domestically, each field becomes a score component and expands the applicable maximum; when blank, it is not applicable. Proposal ranges are interpreted conservatively. |
 | `accepting_outreach` | `yes`/`open` means explicitly accepting contact; `no`/`closed` can never qualify. Blank or `unknown` remains unverified. |
 | `url`, `client_name`, `notes` | Optional review context. URLs must be public HTTP(S) URLs without embedded credentials. |
 
 Supported channels are `upwork`, `v2ex`, `proginn`/`程序员客栈`, and `public`/`公开需求`. Upwork drafts require a post no older than two hours, fewer than 20 proposals, verified payment, and at least two demo-match themes. Domestic/public drafts require the demo-match gate. Every generated message remains unsubmitted.
 
-Generated files are `ranked_leads.csv`, `upwork_proposals.md`, `domestic_messages.md`, `summary.md`, and `audit.jsonl`. Review the original post and correct every assumption before manually sending anything.
+Generated files are `ranked_leads.csv`, `upwork_proposals.md`, `domestic_messages.md`, `summary.md`, and `audit.jsonl`. The ranked CSV reports both earned and applicable points so domestic rows are not penalized for unavailable marketplace-only fields. Review the original post and correct every assumption before manually sending anything.
 
 ## Bounded V2EX Discovery
 

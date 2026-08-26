@@ -101,6 +101,28 @@ class LeadAssistantTests(unittest.TestCase):
             self.assertEqual("false", row["qualified"])
             self.assertEqual("none", row["draft_type"])
 
+    def test_domestic_optional_competition_and_payment_expand_applicable_max(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            input_path = root / "leads.csv"
+            input_path.write_text(
+                "lead_id,channel,title,description,age_hours,proposals,payment_verified\n"
+                "D-1,proginn,API data extraction,API workflow with data extraction and audit validation,1,5,yes\n"
+                "D-2,proginn,API data extraction,API workflow with data extraction and audit validation,1,50,no\n",
+                encoding="utf-8",
+            )
+
+            run_lead_assistant(input_path, root / "output")
+
+            with (root / "output" / "ranked_leads.csv").open(
+                encoding="utf-8", newline=""
+            ) as handle:
+                rows = {row["lead_id"]: row for row in csv.DictReader(handle)}
+            self.assertEqual("100", rows["D-1"]["applicable_max"])
+            self.assertEqual("90", rows["D-1"]["score"])
+            self.assertEqual("100", rows["D-2"]["applicable_max"])
+            self.assertEqual("55", rows["D-2"]["score"])
+
     def test_published_at_requires_timezone_and_as_of_is_repeatable(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

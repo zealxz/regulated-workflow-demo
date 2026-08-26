@@ -556,7 +556,14 @@ def _score_lead(lead: Lead, suppression_reason: str = "") -> ScoredLead:
         + match_points
         + channel_points
     )
-    applicable_max = 100 if lead.channel == "upwork" else 65
+    if lead.channel == "upwork":
+        applicable_max = 100
+    else:
+        applicable_max = (
+            65
+            + (15 if lead.proposals is not None else 0)
+            + (20 if lead.payment_verified is not None else 0)
+        )
     score = round(applicable_points * 100 / applicable_max)
     high_match = match_points >= 20
     outreach_gate = (
