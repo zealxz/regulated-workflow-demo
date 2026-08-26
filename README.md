@@ -120,7 +120,7 @@ Review the original post and edit assumptions before manually sending a draft. D
 
 ## Bounded V2EX Discovery
 
-This optional command makes exactly one no-authenticated request to V2EX's fixed public outsourcing-node endpoint, examines at most 20 topics, and writes a CSV accepted by the offline `leads` command:
+This optional command makes exactly one unauthenticated request to V2EX's fixed public outsourcing-node endpoint, examines at most 20 topics, and writes a CSV accepted by the offline `leads` command:
 
 ```bash
 PYTHONPATH=src python3 -m regulated_workflow v2ex-discover outputs/v2ex-public.csv
