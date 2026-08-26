@@ -19,17 +19,15 @@ body:
   - type: input
     id: volume
     attributes:
-      label: Representative volume
+      label: Representative volume (optional)
       description: Give an approximate document count or row count using no sensitive details.
       placeholder: 12 PDFs, about 20 pages each
-    validations:
-      required: true
 
   - type: textarea
     id: acceptance
     attributes:
-      label: Acceptance check
-      description: How would a human reviewer decide that the pilot output is useful?
+      label: Expected output and acceptance check
+      description: What output is needed, and how would a human reviewer decide that it is useful?
       placeholder: Each change must show old value, new value, source page, and review status.
     validations:
       required: true
@@ -37,19 +35,9 @@ body:
   - type: dropdown
     id: sample_boundary
     attributes:
-      label: Sample-data boundary
+      label: Sample-data boundary (optional)
       options:
         - Public data
         - Properly redacted data
         - Synthetic data
         - Not ready to share a sample
-    validations:
-      required: true
-
-  - type: checkboxes
-    id: scope
-    attributes:
-      label: Scope acknowledgement
-      options:
-        - label: I understand this is a fixed-scope, human-reviewed pilot and not an autonomous legal, medical, financial, or compliance decision system.
-          required: true

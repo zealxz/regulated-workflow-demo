@@ -1,0 +1,6 @@
+{"event": "run_started", "inputs": {"input": "samples/new"}, "mode": "extract", "network_mode": "offline", "timestamp": "2026-08-26T07:49:41.194168Z"}
+{"byte_size": 168, "event": "document_parsed", "evidence_count": 10, "format": "csv", "input_role": "input", "sha256": "eec1bd7c1ca1b5b6c5ee6cd489055d8c4b2e02362ebb0dce27b65e5edec252a6", "source_id": "controls.csv", "timestamp": "2026-08-26T07:49:41.194168Z"}
+{"byte_size": 92, "event": "document_parsed", "evidence_count": 3, "format": "txt", "input_role": "input", "sha256": "98a28d7550362a5adc5263ef912749fe4f6335e5a3c4e66f1a9fbfdbfbec0d06", "source_id": "escalation.txt", "timestamp": "2026-08-26T07:49:41.194168Z"}
+{"byte_size": 278, "event": "document_parsed", "evidence_count": 8, "format": "md", "input_role": "input", "sha256": "c2b0be9ff2b5cc9d3ccdab6fa2f99d0a9f11eb717bec45d128cd8810d09bd8e5", "source_id": "policy.md", "timestamp": "2026-08-26T07:49:41.194168Z"}
+{"byte_size": 191, "event": "document_parsed", "evidence_count": 5, "format": "json", "input_role": "input", "sha256": "fba566bd239545da69b86ba4362784fde0ec3f572ae99b8c6385c0abbc03fd49", "source_id": "registry.json", "timestamp": "2026-08-26T07:49:41.194168Z"}
+{"change_count": 0, "document_count": 4, "event": "run_completed", "evidence_count": 26, "mode": "extract", "review_required": true, "timestamp": "2026-08-26T07:49:41.204455Z"}

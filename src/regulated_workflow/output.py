@@ -50,7 +50,12 @@ def write_csv(
     temp_path = Path(handle.name)
     try:
         with handle:
-            writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=fieldnames,
+                extrasaction="ignore",
+                lineterminator="\n",
+            )
             writer.writeheader()
             writer.writerows(
                 {

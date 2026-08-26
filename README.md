@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/zealxz/regulated-workflow-demo/actions/workflows/tests.yml/badge.svg)](https://github.com/zealxz/regulated-workflow-demo/actions/workflows/tests.yml)
 
-Turn PDFs, CSV tables, and controlled-document versions into source-linked evidence registers and review queues—local-first, with human approval. Excel workbooks are review outputs, not input files.
+Turn text-layer PDFs, CSV tables, and controlled-document versions into source-linked evidence registers and review queues—local-first, with human approval. Excel workbooks are review outputs, not input files; scanned PDFs and OCR require a separately agreed dependency and acceptance sample.
 
 ## Seven-Day Fixed-Scope Pilot
 
@@ -15,7 +15,7 @@ The first two pilots are `$149` / `¥999`:
 
 Choose one buyer-ready result:
 
-- **Evidence extraction:** PDF, text, JSON, or CSV input → `evidence.xlsx` + `review_queue.csv`.
+- **Evidence extraction:** text-layer PDF, text, JSON, or CSV input → `evidence.xlsx` + `review_queue.csv`.
 - **Controlled change review:** old/new document snapshots → `changes.xlsx` + approval-ready `summary.md`.
 
 The pilot also includes one bounded correction round, deployment notes, and seven days of defect support. The workflow is client-owned and runs in the client's environment.
@@ -24,13 +24,17 @@ The pilot also includes one bounded correction round, deployment notes, and seve
 
 **Contact:** [purchase or scope the pilot through Upwork](https://www.upwork.com/services/product/development-it-a-7-day-auditable-document-workflow-automation-sprint-2092293814461481436) · [public scope inquiry](https://github.com/zealxz/regulated-workflow-demo/issues/new?template=pilot-inquiry.yml) (do not include confidential data)
 
+If you reached this demo through a marketplace, keep scoping, contracting, and payment on that same marketplace. Otherwise use the Upwork Catalog or the public fit check above.
+
 **Safety boundary:** only public, properly redacted, or synthetic samples are used. The pilot excludes production hosting, automatic external sending, access-control bypass, autonomous high-impact decisions, and legal, medical, financial, compliance, or approval conclusions.
 
 ## 中文服务简介
 
-把 PDF、CSV 表格和版本文档转成带来源定位的证据台账、差异清单与人工复核队列；Excel 是复核输出，不是输入格式。首两单为 7 日固定范围试点，价格 `¥999`：最多 20 份文档或 500 行、一个流程、一个结构化输出、一个人工审批点、一次限定修正和 7 天缺陷支持。演示全部使用合成数据，不冒充客户案例，不作合规结论。
+把文本型 PDF、CSV 表格和版本文档转成带来源定位的证据台账、差异清单与人工复核队列；Excel 是复核输出，不是输入格式，扫描件与 OCR 依赖需另行约定验收样本。首两单为 7 日固定范围试点，价格 `¥999`：最多 20 份文档或 500 行、一个流程、一个结构化输出、一个人工审批点、一次限定修正和 7 天缺陷支持。演示全部使用合成数据，不冒充客户案例，不作合规结论。
 
 [查看可下载样例](#verified-sample-outputs) · [通过 Upwork 购买或沟通](https://www.upwork.com/services/product/development-it-a-7-day-auditable-document-workflow-automation-sprint-2092293814461481436) · [公开咨询](https://github.com/zealxz/regulated-workflow-demo/issues/new?template=pilot-inquiry.yml)
+
+如果你从程序员客栈、YesPMP、PeoplePerHour 等平台看到此演示，请继续在原平台沟通、签约和付款；不要跨平台交易。
 
 ![Auditable evidence workflow preview](artifacts/portfolio/evidence-cover.png)
 
@@ -40,7 +44,7 @@ The pilot also includes one bounded correction round, deployment notes, and seve
 
 ## What This Demo Proves
 
-- `extract`: local TXT, Markdown, CSV, JSON, and optional PDF → source-linked evidence register and review queue.
+- `extract`: local TXT, Markdown, CSV, JSON, and optional text-layer PDF → source-linked evidence register and review queue.
 - The optional PDF path has a real, single-page synthetic extraction fixture and regression test in CI.
 - `diff`: two local snapshots → explainable old/new changes and review priority.
 - Canonical JSON plus CSV, Markdown, JSONL, and formatted Excel outputs.
@@ -55,8 +59,15 @@ These downloadable artifacts were generated from the repository's synthetic fixt
 | --- | --- |
 | Evidence extraction | [`evidence.xlsx`](outputs/extract/evidence.xlsx) · [`review_queue.csv`](outputs/extract/review_queue.csv) · [`audit.jsonl`](outputs/extract/audit.jsonl) · [`summary.md`](outputs/extract/summary.md) |
 | Controlled change review | [`changes.xlsx`](outputs/diff/changes.xlsx) · [`review_queue.csv`](outputs/diff/review_queue.csv) · [`audit.jsonl`](outputs/diff/audit.jsonl) · [`summary.md`](outputs/diff/summary.md) |
+| Text-layer PDF proof | [`synthetic-policy.pdf`](samples/pdf/synthetic-policy.pdf) → [`evidence.xlsx`](outputs/pdf-extract/evidence.xlsx) · [`evidence.json`](outputs/pdf-extract/evidence.json) · [`review_queue.csv`](outputs/pdf-extract/review_queue.csv) · [`audit.jsonl`](outputs/pdf-extract/audit.jsonl) · [`summary.md`](outputs/pdf-extract/summary.md) |
 
 The verifier confirms 26 evidence items and 13 changes, workbook relationships and sheets, table ranges, data validation, formulas and cached values, review defaults, and final rows.
+
+The committed PDF proof extracts eight page-1 records, including `Policy ID = SYN-PDF-001`, `Owner = Quality Operations`, and `Review Cycle Months = 6`; all remain `pending` for human review. OCR is intentionally outside this demo.
+
+[![Rendered text-layer PDF evidence workbook](artifacts/proof/pdf-evidence-proof.png)](outputs/pdf-extract/evidence.xlsx)
+
+The image above is a direct LibreOffice render of the committed workbook, not a design mockup. Click it to download the review-ready Excel file.
 
 ## Quick Start: Offline Canonical Outputs
 
@@ -76,9 +87,11 @@ python3 scripts/run_demo.py --skip-workbooks
 
 ## Full Demo With Excel Workbooks
 
-Excel export uses Node.js 20+ and `@oai/artifact-tool` 2.8.6+. Inside Codex Desktop, use the bundled workspace dependency runtime. Outside that environment, use `--skip-workbooks` unless a compatible package is available.
+Excel export uses Node.js 20+ and the publicly installable, lockfile-pinned ExcelJS dependency. Install it once in a normal clone; `npm ci` reproduces the exact reviewed dependency tree.
 
 ```bash
+npm ci
+npm run test:workbooks
 python3 scripts/run_demo.py
 python3 scripts/verify_outputs.py outputs/extract outputs/diff
 ```
@@ -99,17 +112,13 @@ regulated-workflow extract INPUT --output-dir DIR [--llm-summary]
 regulated-workflow diff OLD NEW --output-dir DIR [--llm-summary]
 ```
 
-Supported inputs are `.txt`, `.md`, `.csv`, `.json`, and `.pdf`. PDF support is optional:
+Supported inputs are `.txt`, `.md`, `.csv`, `.json`, and text-layer `.pdf`. PDF support is optional; scanned PDFs and OCR are not included:
 
 ```bash
 python3 -m pip install '.[pdf]'
 ```
 
 Unsupported files inside a directory are ignored. An explicitly supplied unsupported file, malformed supported file, missing path, or unsafe output collision fails visibly with exit code `2`.
-
-## Developer Utilities
-
-The repository also includes a review-only lead-ranking CLI with stable-ID suppression and a bounded, contact-redacted public V2EX discovery command. They are deliberately separated from the buyer-facing demo; see [`docs/acquisition-tools.md`](docs/acquisition-tools.md) for their commands, schemas, and safety boundaries.
 
 ## Optional Counts-Only LLM Draft
 
@@ -136,7 +145,9 @@ Only aggregate document/change counts are sent. Source text, field names, values
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests -v
-python3 scripts/run_demo.py --skip-workbooks
+npm ci
+npm run test:workbooks
+python3 scripts/run_demo.py
 python3 scripts/verify_outputs.py outputs/extract outputs/diff
 ```
 

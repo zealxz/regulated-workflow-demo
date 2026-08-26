@@ -1,0 +1,27 @@
+record_type,source_id,field,value,old_value,new_value,confidence,risk_level,reason,review_status
+evidence,controls.csv,row[1].Control ID,CTL-001,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,controls.csv,row[1].Control Name,Temperature excursion,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,controls.csv,row[1].Threshold,4 hours,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,controls.csv,row[1].Owner,Quality Operations,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,controls.csv,row[1].Status,Active,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,controls.csv,row[2].Control ID,CTL-002,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,controls.csv,row[2].Control Name,Deviation backlog,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,controls.csv,row[2].Threshold,5 cases,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,controls.csv,row[2].Owner,Quality Systems,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,controls.csv,row[2].Status,Active,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,escalation.txt,Incident Escalation Hours,12,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,escalation.txt,Log Retention Days,180,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,escalation.txt,Final Approval Role,Quality Director,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,policy.md,heading[1],Synthetic Quality Control Policy,,,0.75,,Verify the source quote and extracted value.,pending
+evidence,policy.md,Policy ID,SYN-QMS-001,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,policy.md,Effective Date,2026-07-01,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,policy.md,Document Status,Approved,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,policy.md,Retention Years,7,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,policy.md,Exception Approval,Quality Director,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,policy.md,Review Cycle Months,6,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,policy.md,text.line[10],This synthetic document is for demonstration only and describes no real organization.,,,0.60,,Verify the source quote and extracted value.,pending
+evidence,registry.json,product_family,Synthetic Device,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,registry.json,registry_version,1.1,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,registry.json,release.max_open_deviations,3,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,registry.json,release.requires_dual_approval,true,,,1.00,,Verify the source quote and extracted value.,pending
+evidence,registry.json,status,controlled-release,,,1.00,,Verify the source quote and extracted value.,pending

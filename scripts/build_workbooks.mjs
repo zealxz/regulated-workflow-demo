@@ -1,33 +1,36 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import { SpreadsheetFile, Workbook } from "@oai/artifact-tool";
+import ExcelJS from "exceljs";
 
 const COLORS = {
-  navy: "#16324F",
-  teal: "#0F766E",
-  paleTeal: "#DDF4F0",
-  paleBlue: "#EAF1F8",
-  paleAmber: "#FFF4D6",
-  paleRed: "#FDE8E7",
-  paleGreen: "#E7F5EC",
-  gray: "#5F6B76",
-  lightGray: "#E2E8F0",
-  white: "#FFFFFF",
+  navy: "FF16324F",
+  teal: "FF0F766E",
+  paleBlue: "FFEAF1F8",
+  paleAmber: "FFFFF4D6",
+  paleRed: "FFFDE8E7",
+  paleGreen: "FFE7F5EC",
+  gray: "FF5F6B76",
+  lightGray: "FFE2E8F0",
+  ink: "FF17212B",
+  amberInk: "FF6B4F00",
+  redInk: "FF8A1C1C",
+  greenInk: "FF155A32",
+  white: "FFFFFFFF",
 };
 
-const MAX_PREVIEW_DATA_ROWS = 30;
+const STATUS_VALIDATION = '"pending,approved,rejected"';
+const RISK_VALIDATION = '"low,medium,high"';
 
 function parseArgs(argv) {
   const parsed = {};
   for (let index = 0; index < argv.length; index += 1) {
-    const value = argv[index];
-    if (!value.startsWith("--")) continue;
-    const key = value.slice(2);
+    const argument = argv[index];
+    if (!argument.startsWith("--")) continue;
+    const key = argument.slice(2);
     const next = argv[index + 1];
-    if (!next || next.startsWith("--")) {
-      parsed[key] = true;
-    } else {
+    if (!next || next.startsWith("--")) parsed[key] = true;
+    else {
       parsed[key] = next;
       index += 1;
     }
@@ -65,47 +68,130 @@ async function readAudit(filePath) {
   });
 }
 
-function setTitle(sheet, title, subtitle, width) {
-  sheet.showGridLines = false;
-  sheet.getRange(`A1:${width}1`).merge();
-  sheet.getRange("A1").values = [[title]];
-  sheet.getRange("A1").format = {
-    fill: COLORS.navy,
-    font: { color: COLORS.white, bold: true, size: 18 },
-    verticalAlignment: "center",
-  };
-  sheet.getRange("A1").format.rowHeight = 34;
-  sheet.getRange(`A2:${width}2`).merge();
-  sheet.getRange("A2").values = [[subtitle]];
-  sheet.getRange("A2").format = {
-    fill: COLORS.paleBlue,
-    font: { color: COLORS.gray, italic: true, size: 10 },
-    wrapText: true,
-  };
-  sheet.getRange("A2").format.rowHeight = 30;
+function createWorkbook() {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "regulated-workflow-demo";
+  workbook.lastModifiedBy = "regulated-workflow-demo";
+  workbook.created = new Date("2026-01-01T00:00:00Z");
+  workbook.modified = new Date("2026-01-01T00:00:00Z");
+  workbook.calcProperties.fullCalcOnLoad = true;
+  workbook.calcProperties.forceFullCalc = true;
+  workbook.calcProperties.calcMode = "auto";
+  return workbook;
 }
 
-function styleHeader(range) {
-  range.format = {
-    fill: COLORS.teal,
-    font: { color: COLORS.white, bold: true },
-    verticalAlignment: "center",
-    wrapText: true,
-    borders: { preset: "outside", style: "thin", color: COLORS.teal },
-  };
-  range.format.rowHeight = 28;
+function solidFill(color) {
+  return { type: "pattern", pattern: "solid", fgColor: { argb: color } };
 }
 
-function styleData(range) {
-  range.format = {
-    font: { color: "#17212B", size: 10 },
-    verticalAlignment: "top",
-    wrapText: true,
-    borders: {
-      insideHorizontal: { style: "thin", color: COLORS.lightGray },
-      bottom: { style: "thin", color: COLORS.lightGray },
+function thinBorder(color = COLORS.lightGray) {
+  const side = { style: "thin", color: { argb: color } };
+  return { top: side, left: side, bottom: side, right: side };
+}
+
+function configureSheet(sheet, freezeRows = 0) {
+  sheet.pageSetup = {
+    paperSize: 9,
+    orientation: "landscape",
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 0,
+    margins: { left: 0.25, right: 0.25, top: 0.35, bottom: 0.35, header: 0.15, footer: 0.15 },
+  };
+  sheet.views = freezeRows
+    ? [{ state: "frozen", ySplit: freezeRows, topLeftCell: `A${freezeRows + 1}`, activeCell: `A${freezeRows + 1}`, showGridLines: false }]
+    : [{ showGridLines: false }];
+  if (freezeRows) sheet.pageSetup.printTitlesRow = `1:${freezeRows}`;
+}
+
+function setTitle(sheet, title, subtitle, lastColumn) {
+  sheet.mergeCells(`A1:${lastColumn}1`);
+  const titleCell = sheet.getCell("A1");
+  titleCell.value = title;
+  titleCell.fill = solidFill(COLORS.navy);
+  titleCell.font = { color: { argb: COLORS.white }, bold: true, size: 18 };
+  titleCell.alignment = { vertical: "middle" };
+  sheet.getRow(1).height = 34;
+
+  sheet.mergeCells(`A2:${lastColumn}2`);
+  const subtitleCell = sheet.getCell("A2");
+  subtitleCell.value = subtitle;
+  subtitleCell.fill = solidFill(COLORS.paleBlue);
+  subtitleCell.font = { color: { argb: COLORS.gray }, italic: true, size: 10 };
+  subtitleCell.alignment = { vertical: "middle", wrapText: true };
+  sheet.getRow(2).height = 30;
+}
+
+function styleHeader(sheet, rowNumber, startColumn, endColumn) {
+  const row = sheet.getRow(rowNumber);
+  row.height = 28;
+  for (let column = startColumn; column <= endColumn; column += 1) {
+    const cell = row.getCell(column);
+    cell.fill = solidFill(COLORS.teal);
+    cell.font = { color: { argb: COLORS.white }, bold: true };
+    cell.alignment = { vertical: "middle", wrapText: true };
+    cell.border = thinBorder(COLORS.teal);
+  }
+}
+
+function styleData(sheet, startRow, endRow, endColumn) {
+  for (let rowNumber = startRow; rowNumber <= endRow; rowNumber += 1) {
+    const row = sheet.getRow(rowNumber);
+    row.height = 36;
+    for (let column = 1; column <= endColumn; column += 1) {
+      const cell = row.getCell(column);
+      cell.font = { color: { argb: COLORS.ink }, size: 10 };
+      cell.alignment = { vertical: "top", wrapText: true };
+      cell.border = { bottom: { style: "thin", color: { argb: COLORS.lightGray } } };
+    }
+  }
+}
+
+function setColumnWidths(sheet, widths) {
+  widths.forEach((width, index) => {
+    sheet.getColumn(index + 1).width = width;
+  });
+}
+
+function addTable(sheet, name, ref, headers, rows) {
+  sheet.addTable({
+    name,
+    ref,
+    headerRow: true,
+    totalsRow: false,
+    style: {
+      theme: "TableStyleMedium2",
+      showFirstColumn: false,
+      showLastColumn: false,
+      showRowStripes: true,
+      showColumnStripes: false,
     },
-  };
+    columns: headers.map((header) => ({ name: header })),
+    rows,
+  });
+}
+
+function addListValidation(sheet, range, formula) {
+  sheet.dataValidations.add(range, { type: "list", allowBlank: false, formulae: [formula] });
+}
+
+function addTextConditionalFormats(sheet, ref, column, rules) {
+  sheet.addConditionalFormatting({
+    ref,
+    rules: rules.map(({ text, fill, font }, index) => ({
+      type: "expression",
+      priority: index + 1,
+      formulae: [`$${column}5="${text}"`],
+      style: {
+        fill: solidFill(fill),
+        font: { color: { argb: font }, bold: text === "high" },
+      },
+    })),
+  });
+}
+
+function setFormula(cell, formula, result) {
+  cell.value = { formula, result };
 }
 
 function value(item, ...keys) {
@@ -142,14 +228,7 @@ function auditCount(event) {
   if (event.event === "run_completed" && Number(event.change_count || 0) > 0) {
     return Number(event.change_count);
   }
-  return Number(
-    event.record_count
-      ?? event.count
-      ?? event.evidence_count
-      ?? event.document_count
-      ?? event.change_count
-      ?? 0,
-  );
+  return Number(event.record_count ?? event.count ?? event.evidence_count ?? event.document_count ?? event.change_count ?? 0);
 }
 
 function auditDetails(event) {
@@ -162,11 +241,10 @@ function auditDetails(event) {
 }
 
 function addAuditSheet(workbook, auditItems) {
-  const sheet = workbook.worksheets.add("Audit");
+  const sheet = workbook.addWorksheet("Audit");
+  configureSheet(sheet, 4);
   setTitle(sheet, "Audit Trail", "Run metadata only. Credentials and full environment values are intentionally excluded.", "G");
   const headers = ["Timestamp", "Event", "Command", "Source ID", "Input Hash", "Record Count", "Details"];
-  sheet.getRange("A4:G4").values = [headers];
-  styleHeader(sheet.getRange("A4:G4"));
   const rows = (auditItems.length ? auditItems : [{ event: "no_audit_events" }]).map((event) => [
     excelSafe(value(event, "timestamp", "time", "created_at")),
     excelSafe(value(event, "event", "event_type", "action")),
@@ -176,144 +254,15 @@ function addAuditSheet(workbook, auditItems) {
     auditCount(event),
     auditDetails(event),
   ]);
-  sheet.getRangeByIndexes(4, 0, rows.length, headers.length).values = rows;
-  styleData(sheet.getRangeByIndexes(4, 0, rows.length, headers.length));
-  sheet.getRange(`A5:A${rows.length + 4}`).format.numberFormat = "yyyy-mm-dd hh:mm";
-  sheet.getRange(`F5:F${rows.length + 4}`).format.numberFormat = "#,##0";
-  [21, 22, 18, 20, 34, 14, 60].forEach((width, index) => {
-    sheet.getRangeByIndexes(0, index, rows.length + 4, 1).format.columnWidth = width;
-  });
-  sheet.freezePanes.freezeRows(4);
-  sheet.tables.add(`A4:G${rows.length + 4}`, true, "AuditEventsTable").style = "TableStyleMedium2";
+  addTable(sheet, "AuditEventsTable", "A4", headers, rows);
+  styleHeader(sheet, 4, 1, headers.length);
+  styleData(sheet, 5, rows.length + 4, headers.length);
+  for (let row = 5; row <= rows.length + 4; row += 1) {
+    sheet.getCell(row, 1).numFmt = "yyyy-mm-dd hh:mm";
+    sheet.getCell(row, 6).numFmt = "#,##0";
+  }
+  setColumnWidths(sheet, [21, 22, 18, 20, 34, 14, 60]);
   return sheet;
-}
-
-function addEvidenceWorkbook(items, auditItems) {
-  const workbook = Workbook.create();
-  const summary = workbook.worksheets.add("Summary");
-  const evidence = workbook.worksheets.add("Evidence");
-  const review = workbook.worksheets.add("Review Queue");
-  addAuditSheet(workbook, auditItems);
-  const evidenceLastRow = Math.max(5, items.length + 4);
-
-  setTitle(summary, "Evidence Register", "Draft output for human review — not a compliance determination.", "H");
-  summary.getRange("A4:B4").values = [["Metric", "Value"]];
-  styleHeader(summary.getRange("A4:B4"));
-  summary.getRange("A5:A9").values = [["Evidence items"], ["Pending review"], ["Approved"], ["Rejected"], ["Average confidence"]];
-  summary.getRange("B5:B9").formulas = [[`=COUNTA('Evidence'!$A$5:$A$${evidenceLastRow})`], [`=COUNTIF('Evidence'!$H$5:$H$${evidenceLastRow},"pending")`], [`=COUNTIF('Evidence'!$H$5:$H$${evidenceLastRow},"approved")`], [`=COUNTIF('Evidence'!$H$5:$H$${evidenceLastRow},"rejected")`], [`=IFERROR(AVERAGE('Evidence'!$G$5:$G$${evidenceLastRow}),0)`]];
-  summary.getRange("B5:B8").format.numberFormat = "#,##0";
-  summary.getRange("B9").format.numberFormat = "0.0%";
-  summary.getRange("A5:B9").format.borders = { preset: "outside", style: "thin", color: COLORS.lightGray };
-  summary.getRange("A11:H11").merge();
-  summary.getRange("A11").values = [["How to use: verify the quote and locator, choose a review status, and add a reviewer note before treating any row as approved."]];
-  summary.getRange("A11").format = { fill: COLORS.paleAmber, font: { color: "#6B4F00", bold: true }, wrapText: true };
-  summary.getRange("A11").format.rowHeight = 36;
-  summary.getRange("A4:B9").format.columnWidth = 22;
-
-  const headers = ["Source ID", "Source", "Locator", "Field", "Value", "Quote", "Confidence", "Review Status"];
-  setTitle(evidence, "Evidence Items", "Canonical records derived from local sample inputs. Use the review status rather than formatting as the decision field.", "H");
-  evidence.getRange("A4:H4").values = [headers];
-  styleHeader(evidence.getRange("A4:H4"));
-  const evidenceRows = items.map((item) => [
-    excelSafe(value(item, "source_id")), excelSafe(value(item, "source_path", "source", "source_id")), locatorFor(item), excelSafe(value(item, "field")),
-    excelSafe(value(item, "value")), excelSafe(value(item, "quote")), Number(value(item, "confidence") || 0), excelSafe(String(value(item, "review_status") || "pending").toLowerCase()),
-  ]);
-  const safeEvidenceRows = evidenceRows.length ? evidenceRows : [["", "", "", "", "", "", 0, "pending"]];
-  evidence.getRangeByIndexes(4, 0, safeEvidenceRows.length, headers.length).values = safeEvidenceRows;
-  styleData(evidence.getRangeByIndexes(4, 0, safeEvidenceRows.length, headers.length));
-  evidence.getRange(`G5:G${safeEvidenceRows.length + 4}`).format.numberFormat = "0.0%";
-  evidence.getRange(`H5:H${safeEvidenceRows.length + 4}`).dataValidation = { rule: { type: "list", values: ["pending", "approved", "rejected"] } };
-  evidence.getRange(`H5:H${safeEvidenceRows.length + 4}`).conditionalFormats.add("containsText", { text: "pending", format: { fill: COLORS.paleAmber, font: { color: "#6B4F00" } } });
-  evidence.getRange(`H5:H${safeEvidenceRows.length + 4}`).conditionalFormats.add("containsText", { text: "approved", format: { fill: COLORS.paleGreen, font: { color: "#155A32" } } });
-  evidence.getRange(`H5:H${safeEvidenceRows.length + 4}`).conditionalFormats.add("containsText", { text: "rejected", format: { fill: COLORS.paleRed, font: { color: "#8A1C1C" } } });
-  [20, 36, 18, 22, 30, 58, 14, 18].forEach((width, index) => evidence.getRangeByIndexes(0, index, safeEvidenceRows.length + 4, 1).format.columnWidth = width);
-  evidence.freezePanes.freezeRows(4);
-  evidence.tables.add(`A4:H${safeEvidenceRows.length + 4}`, true, "EvidenceItemsTable").style = "TableStyleMedium2";
-
-  setTitle(review, "Human Review Queue", "Editable decisions are intentionally separate from extracted evidence. Every item begins as pending.", "J");
-  const reviewHeaders = [...headers, "Reviewer Decision", "Reviewer Note"];
-  review.getRange("A4:J4").values = [reviewHeaders];
-  styleHeader(review.getRange("A4:J4"));
-  const reviewRows = safeEvidenceRows.map((row) => [...row, "pending", ""]);
-  review.getRangeByIndexes(4, 0, reviewRows.length, reviewHeaders.length).values = reviewRows;
-  styleData(review.getRangeByIndexes(4, 0, reviewRows.length, reviewHeaders.length));
-  review.getRange(`G5:G${reviewRows.length + 4}`).format.numberFormat = "0.0%";
-  review.getRange(`I5:I${reviewRows.length + 4}`).dataValidation = { rule: { type: "list", values: ["pending", "approved", "rejected"] } };
-  [20, 32, 16, 20, 26, 48, 12, 16, 18, 42].forEach((width, index) => review.getRangeByIndexes(0, index, reviewRows.length + 4, 1).format.columnWidth = width);
-  review.freezePanes.freezeRows(4);
-  review.tables.add(`A4:J${reviewRows.length + 4}`, true, "EvidenceReviewTable").style = "TableStyleMedium2";
-
-  return workbook;
-}
-
-function addChangesWorkbook(items, auditItems) {
-  const workbook = Workbook.create();
-  const summary = workbook.worksheets.add("Summary");
-  const changes = workbook.worksheets.add("Changes");
-  const review = workbook.worksheets.add("Review Queue");
-  addAuditSheet(workbook, auditItems);
-  const changesLastRow = Math.max(5, items.length + 4);
-
-  setTitle(summary, "Document Change Register", "Risk levels are deterministic review hints, not compliance conclusions.", "H");
-  summary.getRange("A4:B4").values = [["Metric", "Value"]];
-  styleHeader(summary.getRange("A4:B4"));
-  summary.getRange("A5:A9").values = [["Detected changes"], ["High risk"], ["Medium risk"], ["Low risk"], ["Pending review"]];
-  summary.getRange("B5:B9").formulas = [[`=COUNTA('Changes'!$A$5:$A$${changesLastRow})`], [`=COUNTIF('Changes'!$E$5:$E$${changesLastRow},"high")`], [`=COUNTIF('Changes'!$E$5:$E$${changesLastRow},"medium")`], [`=COUNTIF('Changes'!$E$5:$E$${changesLastRow},"low")`], [`=COUNTIF('Changes'!$H$5:$H$${changesLastRow},"pending")`]];
-  summary.getRange("B5:B9").format.numberFormat = "#,##0";
-  summary.getRange("A5:B9").format.borders = { preset: "outside", style: "thin", color: COLORS.lightGray };
-  summary.getRange("D4:E4").values = [["Risk", "Count"]];
-  styleHeader(summary.getRange("D4:E4"));
-  summary.getRange("D5:D7").values = [["High"], ["Medium"], ["Low"]];
-  summary.getRange("E5:E7").formulas = [["=B6"], ["=B7"], ["=B8"]];
-  const chart = summary.charts.add("bar", summary.getRange("D4:E7"));
-  chart.title = "Changes by review risk";
-  chart.hasLegend = false;
-  chart.xAxis = { axisType: "textAxis" };
-  chart.yAxis = { numberFormatCode: "#,##0" };
-  chart.setPosition("D9", "H22");
-  summary.getRange("A11:B14").merge();
-  summary.getRange("A11").values = [["Review high-risk changes first. Confirm source text and business impact before approval or downstream use."]];
-  summary.getRange("A11").format = { fill: COLORS.paleAmber, font: { color: "#6B4F00", bold: true }, wrapText: true, verticalAlignment: "top" };
-  summary.getRange("A11").format.rowHeight = 70;
-  summary.getRange("A4:B14").format.columnWidth = 22;
-
-  const headers = ["Source ID", "Field", "Old Value", "New Value", "Risk Level", "Rationale", "Source Locator", "Review Status"];
-  setTitle(changes, "Detected Changes", "Before/after comparison with source locators and explicit review state.", "H");
-  changes.getRange("A4:H4").values = [headers];
-  styleHeader(changes.getRange("A4:H4"));
-  const changeRows = items.map((item) => {
-    const [sourceId, field] = splitChangeField(item);
-    const sourceLocator = locatorFor(item) || `${sourceId} / ${field}`;
-    return [
-      sourceId, field, excelSafe(value(item, "old_value")), excelSafe(value(item, "new_value")),
-      excelSafe(String(value(item, "risk_level") || "low").toLowerCase()), excelSafe(value(item, "rationale")), excelSafe(sourceLocator), excelSafe(String(value(item, "review_status") || "pending").toLowerCase()),
-    ];
-  });
-  const safeChangeRows = changeRows.length ? changeRows : [["", "", "", "", "low", "", "", "pending"]];
-  changes.getRangeByIndexes(4, 0, safeChangeRows.length, headers.length).values = safeChangeRows;
-  styleData(changes.getRangeByIndexes(4, 0, safeChangeRows.length, headers.length));
-  changes.getRange(`E5:E${safeChangeRows.length + 4}`).dataValidation = { rule: { type: "list", values: ["low", "medium", "high"] } };
-  changes.getRange(`H5:H${safeChangeRows.length + 4}`).dataValidation = { rule: { type: "list", values: ["pending", "approved", "rejected"] } };
-  changes.getRange(`E5:E${safeChangeRows.length + 4}`).conditionalFormats.add("containsText", { text: "high", format: { fill: COLORS.paleRed, font: { color: "#8A1C1C", bold: true } } });
-  changes.getRange(`E5:E${safeChangeRows.length + 4}`).conditionalFormats.add("containsText", { text: "medium", format: { fill: COLORS.paleAmber, font: { color: "#6B4F00" } } });
-  changes.getRange(`E5:E${safeChangeRows.length + 4}`).conditionalFormats.add("containsText", { text: "low", format: { fill: COLORS.paleGreen, font: { color: "#155A32" } } });
-  [20, 22, 34, 34, 15, 48, 22, 18].forEach((width, index) => changes.getRangeByIndexes(0, index, safeChangeRows.length + 4, 1).format.columnWidth = width);
-  changes.freezePanes.freezeRows(4);
-  changes.tables.add(`A4:H${safeChangeRows.length + 4}`, true, "DocumentChangesTable").style = "TableStyleMedium2";
-
-  setTitle(review, "Human Review Queue", "Confirm source, impact, and decision before any downstream action.", "J");
-  const reviewHeaders = [...headers, "Reviewer Decision", "Reviewer Note"];
-  review.getRange("A4:J4").values = [reviewHeaders];
-  styleHeader(review.getRange("A4:J4"));
-  const reviewRows = safeChangeRows.map((row) => [...row, "pending", ""]);
-  review.getRangeByIndexes(4, 0, reviewRows.length, reviewHeaders.length).values = reviewRows;
-  styleData(review.getRangeByIndexes(4, 0, reviewRows.length, reviewHeaders.length));
-  review.getRange(`I5:I${reviewRows.length + 4}`).dataValidation = { rule: { type: "list", values: ["pending", "approved", "rejected"] } };
-  [20, 20, 30, 30, 13, 42, 20, 16, 18, 42].forEach((width, index) => review.getRangeByIndexes(0, index, reviewRows.length + 4, 1).format.columnWidth = width);
-  review.freezePanes.freezeRows(4);
-  review.tables.add(`A4:J${reviewRows.length + 4}`, true, "ChangeReviewTable").style = "TableStyleMedium2";
-
-  return workbook;
 }
 
 function summaryExpectations(kind, items) {
@@ -328,109 +277,255 @@ function summaryExpectations(kind, items) {
       ? confidences.reduce((total, confidence) => total + confidence, 0) / confidences.length
       : 0;
     return [
-      { address: "B5", formula: `=COUNTA('Evidence'!$A$5:$A$${lastRow})`, expectedValue: items.length },
-      { address: "B6", formula: `=COUNTIF('Evidence'!$H$5:$H$${lastRow},"pending")`, expectedValue: statuses.filter((status) => status === "pending").length },
-      { address: "B7", formula: `=COUNTIF('Evidence'!$H$5:$H$${lastRow},"approved")`, expectedValue: statuses.filter((status) => status === "approved").length },
-      { address: "B8", formula: `=COUNTIF('Evidence'!$H$5:$H$${lastRow},"rejected")`, expectedValue: statuses.filter((status) => status === "rejected").length },
-      { address: "B9", formula: `=IFERROR(AVERAGE('Evidence'!$G$5:$G$${lastRow}),0)`, expectedValue: averageConfidence },
+      { address: "B5", formula: `COUNTA('Evidence'!$A$5:$A$${lastRow})`, expectedValue: items.length },
+      { address: "B6", formula: `COUNTIF('Evidence'!$H$5:$H$${lastRow},"pending")`, expectedValue: statuses.filter((status) => status === "pending").length },
+      { address: "B7", formula: `COUNTIF('Evidence'!$H$5:$H$${lastRow},"approved")`, expectedValue: statuses.filter((status) => status === "approved").length },
+      { address: "B8", formula: `COUNTIF('Evidence'!$H$5:$H$${lastRow},"rejected")`, expectedValue: statuses.filter((status) => status === "rejected").length },
+      { address: "B9", formula: `IFERROR(AVERAGE('Evidence'!$G$5:$G$${lastRow}),0)`, expectedValue: averageConfidence },
     ];
   }
-
   const risks = items.map((item) => String(value(item, "risk_level") || "low").toLowerCase());
   const statuses = items.map((item) => String(value(item, "review_status") || "pending").toLowerCase());
   const high = risks.filter((risk) => risk === "high").length;
   const medium = risks.filter((risk) => risk === "medium").length;
   const low = risks.filter((risk) => risk === "low").length;
   return [
-    { address: "B5", formula: `=COUNTA('Changes'!$A$5:$A$${lastRow})`, expectedValue: items.length },
-    { address: "B6", formula: `=COUNTIF('Changes'!$E$5:$E$${lastRow},"high")`, expectedValue: high },
-    { address: "B7", formula: `=COUNTIF('Changes'!$E$5:$E$${lastRow},"medium")`, expectedValue: medium },
-    { address: "B8", formula: `=COUNTIF('Changes'!$E$5:$E$${lastRow},"low")`, expectedValue: low },
-    { address: "B9", formula: `=COUNTIF('Changes'!$H$5:$H$${lastRow},"pending")`, expectedValue: statuses.filter((status) => status === "pending").length },
-    { address: "E5", formula: "=B6", expectedValue: high },
-    { address: "E6", formula: "=B7", expectedValue: medium },
-    { address: "E7", formula: "=B8", expectedValue: low },
+    { address: "B5", formula: `COUNTA('Changes'!$A$5:$A$${lastRow})`, expectedValue: items.length },
+    { address: "B6", formula: `COUNTIF('Changes'!$E$5:$E$${lastRow},"high")`, expectedValue: high },
+    { address: "B7", formula: `COUNTIF('Changes'!$E$5:$E$${lastRow},"medium")`, expectedValue: medium },
+    { address: "B8", formula: `COUNTIF('Changes'!$E$5:$E$${lastRow},"low")`, expectedValue: low },
+    { address: "B9", formula: `COUNTIF('Changes'!$H$5:$H$${lastRow},"pending")`, expectedValue: statuses.filter((status) => status === "pending").length },
+    { address: "E5", formula: "B6", expectedValue: high },
+    { address: "E6", formula: "B7", expectedValue: medium },
+    { address: "E7", formula: "B8", expectedValue: low },
   ];
 }
 
+function applySummaryFormulas(summary, expectations) {
+  for (const { address, formula, expectedValue } of expectations) setFormula(summary.getCell(address), formula, expectedValue);
+}
+
 function verifySummaryFormulas(workbook, expectations) {
-  const summary = workbook.worksheets.getItem("Summary");
+  const summary = workbook.getWorksheet("Summary");
   return expectations.map(({ address, formula, expectedValue }) => {
-    const range = summary.getRange(address);
-    const actualFormula = range.formulas?.[0]?.[0];
-    const actualValue = range.values?.[0]?.[0];
+    const cell = summary.getCell(address);
+    const cellValue = cell.value;
+    const actualFormula = cellValue?.formula;
+    // ExcelJS intentionally omits a zero result from cell.value, while cell.result
+    // and the serialized <v> still retain it.
+    const actualValue = cell.result;
     if (actualFormula !== formula) {
       throw new Error(`Summary ${address} formula mismatch: expected ${formula}, found ${actualFormula || "<empty>"}`);
     }
     if (typeof actualValue !== "number" || !Number.isFinite(actualValue)) {
-      throw new Error(`Summary ${address} must calculate to a finite number; found ${String(actualValue)}`);
+      throw new Error(`Summary ${address} must have a finite cached result; found ${String(actualValue)}`);
     }
     const tolerance = Math.max(1, Math.abs(expectedValue)) * 1e-12;
     if (Math.abs(actualValue - expectedValue) > tolerance) {
-      throw new Error(`Summary ${address} value mismatch: expected ${expectedValue}, found ${actualValue}`);
+      throw new Error(`Summary ${address} result mismatch: expected ${expectedValue}, found ${actualValue}`);
     }
     return { address, formula: actualFormula, value: actualValue };
   });
 }
 
-function previewSpecs(kind, itemCount, auditCount) {
-  const dataSheet = kind === "evidence" ? "Evidence" : "Changes";
-  const dataWidth = kind === "evidence" ? "H" : "H";
-  const dataLastRow = Math.min(itemCount, MAX_PREVIEW_DATA_ROWS) + 4;
-  const reviewLastRow = Math.min(itemCount, MAX_PREVIEW_DATA_ROWS) + 4;
-  const auditLastRow = Math.min(Math.max(auditCount, 1), MAX_PREVIEW_DATA_ROWS) + 4;
-  return [
-    { sheetName: "Summary", autoCrop: "all" },
-    { sheetName: dataSheet, range: `A1:${dataWidth}${dataLastRow}` },
-    { sheetName: "Review Queue", range: `A1:J${reviewLastRow}` },
-    { sheetName: "Audit", range: `A1:G${auditLastRow}` },
-  ];
+function addEvidenceWorkbook(items, auditItems) {
+  const workbook = createWorkbook();
+  const summary = workbook.addWorksheet("Summary");
+  const evidence = workbook.addWorksheet("Evidence");
+  const review = workbook.addWorksheet("Review Queue");
+  addAuditSheet(workbook, auditItems);
+
+  configureSheet(summary);
+  setTitle(summary, "Evidence Register", "Draft output for human review — not a compliance determination.", "H");
+  summary.getCell("A4").value = "Metric";
+  summary.getCell("B4").value = "Value";
+  styleHeader(summary, 4, 1, 2);
+  ["Evidence items", "Pending review", "Approved", "Rejected", "Average confidence"].forEach((label, index) => {
+    summary.getCell(index + 5, 1).value = label;
+  });
+  const expectations = summaryExpectations("evidence", items);
+  applySummaryFormulas(summary, expectations);
+  for (let row = 5; row <= 9; row += 1) {
+    summary.getCell(row, 1).border = thinBorder();
+    summary.getCell(row, 2).border = thinBorder();
+    summary.getCell(row, 2).numFmt = row === 9 ? "0.0%" : "#,##0";
+  }
+  summary.mergeCells("A11:H11");
+  const note = summary.getCell("A11");
+  note.value = "How to use: verify the quote and locator, choose a review status, and add a reviewer note before treating any row as approved.";
+  note.fill = solidFill(COLORS.paleAmber);
+  note.font = { color: { argb: COLORS.amberInk }, bold: true };
+  note.alignment = { vertical: "middle", wrapText: true };
+  summary.getRow(11).height = 36;
+  setColumnWidths(summary, [24, 16, 4, 16, 16, 16, 16, 16]);
+
+  const headers = ["Source ID", "Source", "Locator", "Field", "Value", "Quote", "Confidence", "Review Status"];
+  const evidenceRows = items.map((item) => [
+    excelSafe(value(item, "source_id")), excelSafe(value(item, "source_path", "source", "source_id")), locatorFor(item), excelSafe(value(item, "field")),
+    excelSafe(value(item, "value")), excelSafe(value(item, "quote")), Number(value(item, "confidence") || 0), excelSafe(String(value(item, "review_status") || "pending").toLowerCase()),
+  ]);
+  const safeEvidenceRows = evidenceRows.length ? evidenceRows : [["", "", "", "", "", "", 0, "pending"]];
+  configureSheet(evidence, 4);
+  setTitle(evidence, "Evidence Items", "Canonical records derived from local sample inputs. Use the review status rather than formatting as the decision field.", "H");
+  addTable(evidence, "EvidenceItemsTable", "A4", headers, safeEvidenceRows);
+  styleHeader(evidence, 4, 1, headers.length);
+  styleData(evidence, 5, safeEvidenceRows.length + 4, headers.length);
+  for (let row = 5; row <= safeEvidenceRows.length + 4; row += 1) evidence.getCell(row, 7).numFmt = "0.0%";
+  addListValidation(evidence, `H5:H${safeEvidenceRows.length + 4}`, STATUS_VALIDATION);
+  addTextConditionalFormats(evidence, `H5:H${safeEvidenceRows.length + 4}`, "H", [
+    { text: "pending", fill: COLORS.paleAmber, font: COLORS.amberInk },
+    { text: "approved", fill: COLORS.paleGreen, font: COLORS.greenInk },
+    { text: "rejected", fill: COLORS.paleRed, font: COLORS.redInk },
+  ]);
+  setColumnWidths(evidence, [20, 36, 18, 22, 30, 58, 14, 18]);
+
+  const reviewHeaders = [...headers, "Reviewer Decision", "Reviewer Note"];
+  const reviewRows = safeEvidenceRows.map((row) => [...row, "pending", ""]);
+  configureSheet(review, 4);
+  setTitle(review, "Human Review Queue", "Editable decisions are intentionally separate from extracted evidence. Every item begins as pending.", "J");
+  addTable(review, "EvidenceReviewTable", "A4", reviewHeaders, reviewRows);
+  styleHeader(review, 4, 1, reviewHeaders.length);
+  styleData(review, 5, reviewRows.length + 4, reviewHeaders.length);
+  for (let row = 5; row <= reviewRows.length + 4; row += 1) review.getCell(row, 7).numFmt = "0.0%";
+  addListValidation(review, `I5:I${reviewRows.length + 4}`, STATUS_VALIDATION);
+  addTextConditionalFormats(review, `I5:I${reviewRows.length + 4}`, "I", [
+    { text: "pending", fill: COLORS.paleAmber, font: COLORS.amberInk },
+    { text: "approved", fill: COLORS.paleGreen, font: COLORS.greenInk },
+    { text: "rejected", fill: COLORS.paleRed, font: COLORS.redInk },
+  ]);
+  setColumnWidths(review, [20, 32, 16, 20, 26, 48, 12, 16, 18, 42]);
+  return { workbook, expectations };
 }
 
-async function verifyAndExport(workbook, kind, items, auditItems, outputPath, verifyDir) {
+function addChangesWorkbook(items, auditItems) {
+  const workbook = createWorkbook();
+  const summary = workbook.addWorksheet("Summary");
+  const changes = workbook.addWorksheet("Changes");
+  const review = workbook.addWorksheet("Review Queue");
+  addAuditSheet(workbook, auditItems);
+
+  configureSheet(summary);
+  setTitle(summary, "Document Change Register", "Risk levels are deterministic review hints, not compliance conclusions.", "H");
+  summary.getCell("A4").value = "Metric";
+  summary.getCell("B4").value = "Value";
+  styleHeader(summary, 4, 1, 2);
+  ["Detected changes", "High risk", "Medium risk", "Low risk", "Pending review"].forEach((label, index) => {
+    summary.getCell(index + 5, 1).value = label;
+  });
+  summary.getCell("D4").value = "Risk";
+  summary.getCell("E4").value = "Count";
+  styleHeader(summary, 4, 4, 5);
+  ["High", "Medium", "Low"].forEach((label, index) => {
+    const cell = summary.getCell(index + 5, 4);
+    cell.value = label;
+    cell.fill = solidFill([COLORS.paleRed, COLORS.paleAmber, COLORS.paleGreen][index]);
+    cell.font = { bold: true, color: { argb: [COLORS.redInk, COLORS.amberInk, COLORS.greenInk][index] } };
+  });
+  const expectations = summaryExpectations("changes", items);
+  applySummaryFormulas(summary, expectations);
+  for (let row = 5; row <= 9; row += 1) {
+    summary.getCell(row, 1).border = thinBorder();
+    summary.getCell(row, 2).border = thinBorder();
+    summary.getCell(row, 2).numFmt = "#,##0";
+  }
+  for (let row = 5; row <= 7; row += 1) {
+    summary.getCell(row, 4).border = thinBorder();
+    summary.getCell(row, 5).border = thinBorder();
+    summary.getCell(row, 5).numFmt = "#,##0";
+  }
+  summary.mergeCells("A11:B14");
+  const note = summary.getCell("A11");
+  note.value = "Review high-risk changes first. Confirm source text and business impact before approval or downstream use.";
+  note.fill = solidFill(COLORS.paleAmber);
+  note.font = { color: { argb: COLORS.amberInk }, bold: true };
+  note.alignment = { vertical: "top", wrapText: true };
+  summary.getRow(11).height = 70;
+  setColumnWidths(summary, [24, 16, 4, 16, 14, 14, 14, 14]);
+
+  const headers = ["Source ID", "Field", "Old Value", "New Value", "Risk Level", "Rationale", "Source Locator", "Review Status"];
+  const changeRows = items.map((item) => {
+    const [sourceId, field] = splitChangeField(item);
+    const sourceLocator = locatorFor(item) || `${sourceId} / ${field}`;
+    return [
+      sourceId, field, excelSafe(value(item, "old_value")), excelSafe(value(item, "new_value")),
+      excelSafe(String(value(item, "risk_level") || "low").toLowerCase()), excelSafe(value(item, "rationale")), excelSafe(sourceLocator), excelSafe(String(value(item, "review_status") || "pending").toLowerCase()),
+    ];
+  });
+  const safeChangeRows = changeRows.length ? changeRows : [["", "", "", "", "low", "", "", "pending"]];
+  configureSheet(changes, 4);
+  setTitle(changes, "Detected Changes", "Before/after comparison with source locators and explicit review state.", "H");
+  addTable(changes, "DocumentChangesTable", "A4", headers, safeChangeRows);
+  styleHeader(changes, 4, 1, headers.length);
+  styleData(changes, 5, safeChangeRows.length + 4, headers.length);
+  addListValidation(changes, `E5:E${safeChangeRows.length + 4}`, RISK_VALIDATION);
+  addListValidation(changes, `H5:H${safeChangeRows.length + 4}`, STATUS_VALIDATION);
+  addTextConditionalFormats(changes, `E5:E${safeChangeRows.length + 4}`, "E", [
+    { text: "high", fill: COLORS.paleRed, font: COLORS.redInk },
+    { text: "medium", fill: COLORS.paleAmber, font: COLORS.amberInk },
+    { text: "low", fill: COLORS.paleGreen, font: COLORS.greenInk },
+  ]);
+  addTextConditionalFormats(changes, `H5:H${safeChangeRows.length + 4}`, "H", [
+    { text: "pending", fill: COLORS.paleAmber, font: COLORS.amberInk },
+    { text: "approved", fill: COLORS.paleGreen, font: COLORS.greenInk },
+    { text: "rejected", fill: COLORS.paleRed, font: COLORS.redInk },
+  ]);
+  setColumnWidths(changes, [20, 22, 34, 34, 15, 48, 22, 18]);
+
+  const reviewHeaders = [...headers, "Reviewer Decision", "Reviewer Note"];
+  const reviewRows = safeChangeRows.map((row) => [...row, "pending", ""]);
+  configureSheet(review, 4);
+  setTitle(review, "Human Review Queue", "Confirm source, impact, and decision before any downstream action.", "J");
+  addTable(review, "ChangeReviewTable", "A4", reviewHeaders, reviewRows);
+  styleHeader(review, 4, 1, reviewHeaders.length);
+  styleData(review, 5, reviewRows.length + 4, reviewHeaders.length);
+  addListValidation(review, `I5:I${reviewRows.length + 4}`, STATUS_VALIDATION);
+  addTextConditionalFormats(review, `I5:I${reviewRows.length + 4}`, "I", [
+    { text: "pending", fill: COLORS.paleAmber, font: COLORS.amberInk },
+    { text: "approved", fill: COLORS.paleGreen, font: COLORS.greenInk },
+    { text: "rejected", fill: COLORS.paleRed, font: COLORS.redInk },
+  ]);
+  setColumnWidths(review, [20, 20, 30, 30, 13, 42, 20, 16, 18, 42]);
+  return { workbook, expectations };
+}
+
+function inspectionRecords(workbook, formulaChecks) {
+  const records = workbook.worksheets.map((sheet) => ({
+    type: "worksheet",
+    sheet: sheet.name,
+    rowCount: sheet.rowCount,
+    columnCount: sheet.columnCount,
+    tables: Object.values(sheet.tables).map((table) => ({ name: table.name, ref: table.table.tableRef })),
+  }));
+  records.push({ type: "summary_formula_checks", checks: formulaChecks });
+  return records;
+}
+
+async function verifyAndExport(workbook, expectations, kind, outputPath, verifyDir) {
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.mkdir(verifyDir, { recursive: true });
-
-  const previews = previewSpecs(kind, items.length, auditItems.length);
-  const sheetNames = previews.map(({ sheetName }) => sheetName);
-  const summaryFormulaChecks = verifySummaryFormulas(workbook, summaryExpectations(kind, items));
-
-  const inspection = await workbook.inspect({
-    kind: "table",
-    range: "Summary!A1:H22",
-    include: "values,formulas",
-    tableMaxRows: 24,
-    tableMaxCols: 10,
-    maxChars: 8000,
-  });
-
-  for (const { sheetName, range, autoCrop } of previews) {
-    const blob = await workbook.render({ sheetName, range, autoCrop, scale: 1.4, format: "png" });
-    const fileName = `${kind}-${sheetName.toLowerCase().replaceAll(" ", "-")}.png`;
-    await fs.writeFile(path.join(verifyDir, fileName), new Uint8Array(await blob.arrayBuffer()));
-  }
-  const output = await SpreadsheetFile.exportXlsx(workbook);
-  await output.save(outputPath);
-  return {
-    inspection: inspection.ndjson,
-    summaryFormulaChecks,
-    previewRanges: Object.fromEntries(previews.map(({ sheetName, range }) => [sheetName, range || "autoCrop:all"])),
-    sheets: sheetNames,
-  };
+  const summaryFormulaChecks = verifySummaryFormulas(workbook, expectations);
+  await workbook.xlsx.writeFile(outputPath, { useStyles: true, useSharedStrings: true });
+  const inspection = `${inspectionRecords(workbook, summaryFormulaChecks).map((record) => JSON.stringify(record)).join("\n")}\n`;
+  const inspectionPath = `${outputPath}.inspect.ndjson`;
+  await fs.writeFile(inspectionPath, inspection, "utf8");
+  await fs.writeFile(
+    path.join(verifyDir, `${kind}-workbook-inspection.json`),
+    `${JSON.stringify({ kind, output: outputPath, sheets: workbook.worksheets.map((sheet) => sheet.name), summaryFormulaChecks }, null, 2)}\n`,
+    "utf8",
+  );
+  return { inspectionPath, summaryFormulaChecks, sheets: workbook.worksheets.map((sheet) => sheet.name) };
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   requireArgs(args, ["kind", "input", "output", "verify-dir"]);
-  if (!new Set(["evidence", "changes"]).has(args.kind)) {
-    throw new Error("--kind must be evidence or changes");
-  }
+  if (!new Set(["evidence", "changes"]).has(args.kind)) throw new Error("--kind must be evidence or changes");
   const items = await readJson(args.input, args.kind);
   const auditItems = await readAudit(args.audit);
-  const workbook = args.kind === "evidence"
+  const { workbook, expectations } = args.kind === "evidence"
     ? addEvidenceWorkbook(items, auditItems)
     : addChangesWorkbook(items, auditItems);
-  const result = await verifyAndExport(workbook, args.kind, items, auditItems, args.output, args["verify-dir"]);
+  const result = await verifyAndExport(workbook, expectations, args.kind, args.output, args["verify-dir"]);
   process.stdout.write(`${JSON.stringify({ ok: true, kind: args.kind, output: args.output, itemCount: items.length, ...result }, null, 2)}\n`);
 }
 

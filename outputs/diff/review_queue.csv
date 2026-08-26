@@ -1,0 +1,14 @@
+record_type,source_id,field,value,old_value,new_value,confidence,risk_level,reason,review_status
+change,controls.csv,row[1].Threshold,,8 hours,4 hours,,high,Value changed; confirm the revised value against the source.,pending
+change,controls.csv,row[2].Threshold,,10 cases,5 cases,,high,Value changed; confirm the revised value against the source.,pending
+change,escalation.txt,Final Approval Role,,Quality Manager,Quality Director,,high,Value changed; confirm the revised value against the source.,pending
+change,escalation.txt,Incident Escalation Hours,,24,12,,medium,Value changed; confirm the revised value against the source.,pending
+change,escalation.txt,Log Retention Days,,90,180,,high,Value changed; confirm the revised value against the source.,pending
+change,policy.md,Effective Date,,2026-01-01,2026-07-01,,high,Value changed; confirm the revised value against the source.,pending
+change,policy.md,Exception Approval,,Quality Manager,Quality Director,,high,Value changed; confirm the revised value against the source.,pending
+change,policy.md,Retention Years,,5,7,,high,Value changed; confirm the revised value against the source.,pending
+change,policy.md,Review Cycle Months,,12,6,,medium,Value changed; confirm the revised value against the source.,pending
+change,registry.json,registry_version,,1.0,1.1,,medium,Value changed; confirm the revised value against the source.,pending
+change,registry.json,release.max_open_deviations,,5,3,,medium,Value changed; confirm the revised value against the source.,pending
+change,registry.json,release.requires_dual_approval,,false,true,,high,Value changed; confirm the revised value against the source.,pending
+change,registry.json,status,,pilot,controlled-release,,medium,Value changed; confirm the revised value against the source.,pending

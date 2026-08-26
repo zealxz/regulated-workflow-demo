@@ -5,10 +5,14 @@
   "engines": {
     "node": ">=20"
   },
-  "peerDependencies": {
-    "@oai/artifact-tool": ">=2.8.6"
+  "dependencies": {
+    "exceljs": "4.4.0"
+  },
+  "overrides": {
+    "uuid": "11.1.1"
   },
   "scripts": {
-    "workbook": "node scripts/build_workbooks.mjs"
+    "workbook": "node scripts/build_workbooks.mjs",
+    "test:workbooks": "node --test tests/test_workbook_export.mjs"
   }
 }

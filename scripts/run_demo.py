@@ -77,6 +77,11 @@ def main() -> int:
             raise SystemExit(
                 "Node.js is required for XLSX export. Set REGULATED_WORKFLOW_NODE or use --skip-workbooks."
             )
+        if not (ROOT / "node_modules" / "exceljs" / "package.json").is_file():
+            raise SystemExit(
+                "ExcelJS is required for XLSX export. Run `npm ci` in the repository root "
+                "or use --skip-workbooks."
+            )
         verification_root = ROOT / "artifacts" / "verification"
         run(
             [

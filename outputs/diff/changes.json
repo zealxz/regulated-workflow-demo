@@ -1,0 +1,106 @@
+[
+  {
+    "field": "controls.csv::row[1].Threshold",
+    "new_value": "4 hours",
+    "old_value": "8 hours",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "high"
+  },
+  {
+    "field": "controls.csv::row[2].Threshold",
+    "new_value": "5 cases",
+    "old_value": "10 cases",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "high"
+  },
+  {
+    "field": "escalation.txt::Final Approval Role",
+    "new_value": "Quality Director",
+    "old_value": "Quality Manager",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "high"
+  },
+  {
+    "field": "escalation.txt::Incident Escalation Hours",
+    "new_value": "12",
+    "old_value": "24",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "medium"
+  },
+  {
+    "field": "escalation.txt::Log Retention Days",
+    "new_value": "180",
+    "old_value": "90",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "high"
+  },
+  {
+    "field": "policy.md::Effective Date",
+    "new_value": "2026-07-01",
+    "old_value": "2026-01-01",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "high"
+  },
+  {
+    "field": "policy.md::Exception Approval",
+    "new_value": "Quality Director",
+    "old_value": "Quality Manager",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "high"
+  },
+  {
+    "field": "policy.md::Retention Years",
+    "new_value": "7",
+    "old_value": "5",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "high"
+  },
+  {
+    "field": "policy.md::Review Cycle Months",
+    "new_value": "6",
+    "old_value": "12",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "medium"
+  },
+  {
+    "field": "registry.json::registry_version",
+    "new_value": "1.1",
+    "old_value": "1.0",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "medium"
+  },
+  {
+    "field": "registry.json::release.max_open_deviations",
+    "new_value": "3",
+    "old_value": "5",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "medium"
+  },
+  {
+    "field": "registry.json::release.requires_dual_approval",
+    "new_value": "true",
+    "old_value": "false",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "high"
+  },
+  {
+    "field": "registry.json::status",
+    "new_value": "controlled-release",
+    "old_value": "pilot",
+    "rationale": "Value changed; confirm the revised value against the source.",
+    "review_status": "pending",
+    "risk_level": "medium"
+  }
+]

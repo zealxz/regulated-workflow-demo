@@ -12,6 +12,7 @@ from regulated_workflow.workflows import run_diff, run_extract
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SAMPLES = PROJECT_ROOT / "samples"
 PDF_FIXTURE = SAMPLES / "pdf" / "synthetic-policy.pdf"
+PDF_PROOF = PROJECT_ROOT / "outputs" / "pdf-extract"
 
 
 class WorkflowTests(unittest.TestCase):
@@ -62,6 +63,18 @@ class WorkflowTests(unittest.TestCase):
             self.assertEqual("Quality Operations", fields["Owner"]["value"])
             self.assertEqual("6", fields["Review Cycle Months"]["value"])
             self.assertTrue(all(item["page"] == 1 for item in evidence))
+            self.assertEqual(
+                evidence,
+                json.loads((PDF_PROOF / "evidence.json").read_text("utf-8")),
+            )
+            self.assertEqual(
+                (output_dir / "review_queue.csv").read_bytes(),
+                (PDF_PROOF / "review_queue.csv").read_bytes(),
+            )
+            self.assertEqual(
+                (output_dir / "summary.md").read_text("utf-8"),
+                (PDF_PROOF / "summary.md").read_text("utf-8"),
+            )
 
             audit_records = [
                 json.loads(line)

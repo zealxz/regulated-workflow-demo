@@ -1,0 +1,3 @@
+{"event": "run_started", "inputs": {"input": "samples/pdf/synthetic-policy.pdf"}, "mode": "extract", "network_mode": "offline", "timestamp": "2026-08-26T07:49:41.813331Z"}
+{"byte_size": 2056, "event": "document_parsed", "evidence_count": 8, "format": "pdf", "input_role": "input", "sha256": "9484d03076fbc3e5a1b5ecf5a2722258a8bef43501ac9ade6d5fd342501b3547", "source_id": "synthetic-policy.pdf", "timestamp": "2026-08-26T07:49:41.813331Z"}
+{"change_count": 0, "document_count": 1, "event": "run_completed", "evidence_count": 8, "mode": "extract", "review_required": true, "timestamp": "2026-08-26T07:49:41.849734Z"}

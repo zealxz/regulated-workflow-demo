@@ -1,0 +1,9 @@
+record_type,source_id,field,value,old_value,new_value,confidence,risk_level,reason,review_status
+evidence,synthetic-policy.pdf,text.line[1],Synthetic Policy Extract Fixture,,,0.60,,Verify the source quote and extracted value.,pending
+evidence,synthetic-policy.pdf,Policy ID,SYN-PDF-001,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,synthetic-policy.pdf,Document Status,Draft,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,synthetic-policy.pdf,Owner,Quality Operations,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,synthetic-policy.pdf,Review Cycle Months,6,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,synthetic-policy.pdf,Notice,Synthetic test fixture. No real organization.,,,0.90,,Verify the source quote and extracted value.,pending
+evidence,synthetic-policy.pdf,text.line[7],Public synthetic input - safe for parser verification,,,0.60,,Verify the source quote and extracted value.,pending
+evidence,synthetic-policy.pdf,text.line[8],Page 1 of 1,,,0.60,,Verify the source quote and extracted value.,pending

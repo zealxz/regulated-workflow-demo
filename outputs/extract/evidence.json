@@ -1,0 +1,236 @@
+[
+  {
+    "confidence": 1.0,
+    "field": "row[1].Control ID",
+    "page": 1,
+    "quote": "Control ID=CTL-001",
+    "review_status": "pending",
+    "source_id": "controls.csv",
+    "value": "CTL-001"
+  },
+  {
+    "confidence": 1.0,
+    "field": "row[1].Control Name",
+    "page": 1,
+    "quote": "Control Name=Temperature excursion",
+    "review_status": "pending",
+    "source_id": "controls.csv",
+    "value": "Temperature excursion"
+  },
+  {
+    "confidence": 1.0,
+    "field": "row[1].Threshold",
+    "page": 1,
+    "quote": "Threshold=4 hours",
+    "review_status": "pending",
+    "source_id": "controls.csv",
+    "value": "4 hours"
+  },
+  {
+    "confidence": 1.0,
+    "field": "row[1].Owner",
+    "page": 1,
+    "quote": "Owner=Quality Operations",
+    "review_status": "pending",
+    "source_id": "controls.csv",
+    "value": "Quality Operations"
+  },
+  {
+    "confidence": 1.0,
+    "field": "row[1].Status",
+    "page": 1,
+    "quote": "Status=Active",
+    "review_status": "pending",
+    "source_id": "controls.csv",
+    "value": "Active"
+  },
+  {
+    "confidence": 1.0,
+    "field": "row[2].Control ID",
+    "page": 1,
+    "quote": "Control ID=CTL-002",
+    "review_status": "pending",
+    "source_id": "controls.csv",
+    "value": "CTL-002"
+  },
+  {
+    "confidence": 1.0,
+    "field": "row[2].Control Name",
+    "page": 1,
+    "quote": "Control Name=Deviation backlog",
+    "review_status": "pending",
+    "source_id": "controls.csv",
+    "value": "Deviation backlog"
+  },
+  {
+    "confidence": 1.0,
+    "field": "row[2].Threshold",
+    "page": 1,
+    "quote": "Threshold=5 cases",
+    "review_status": "pending",
+    "source_id": "controls.csv",
+    "value": "5 cases"
+  },
+  {
+    "confidence": 1.0,
+    "field": "row[2].Owner",
+    "page": 1,
+    "quote": "Owner=Quality Systems",
+    "review_status": "pending",
+    "source_id": "controls.csv",
+    "value": "Quality Systems"
+  },
+  {
+    "confidence": 1.0,
+    "field": "row[2].Status",
+    "page": 1,
+    "quote": "Status=Active",
+    "review_status": "pending",
+    "source_id": "controls.csv",
+    "value": "Active"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Incident Escalation Hours",
+    "page": 1,
+    "quote": "Incident Escalation Hours: 12",
+    "review_status": "pending",
+    "source_id": "escalation.txt",
+    "value": "12"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Log Retention Days",
+    "page": 1,
+    "quote": "Log Retention Days: 180",
+    "review_status": "pending",
+    "source_id": "escalation.txt",
+    "value": "180"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Final Approval Role",
+    "page": 1,
+    "quote": "Final Approval Role: Quality Director",
+    "review_status": "pending",
+    "source_id": "escalation.txt",
+    "value": "Quality Director"
+  },
+  {
+    "confidence": 0.75,
+    "field": "heading[1]",
+    "page": 1,
+    "quote": "# Synthetic Quality Control Policy",
+    "review_status": "pending",
+    "source_id": "policy.md",
+    "value": "Synthetic Quality Control Policy"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Policy ID",
+    "page": 1,
+    "quote": "Policy ID: SYN-QMS-001",
+    "review_status": "pending",
+    "source_id": "policy.md",
+    "value": "SYN-QMS-001"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Effective Date",
+    "page": 1,
+    "quote": "Effective Date: 2026-07-01",
+    "review_status": "pending",
+    "source_id": "policy.md",
+    "value": "2026-07-01"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Document Status",
+    "page": 1,
+    "quote": "Document Status: Approved",
+    "review_status": "pending",
+    "source_id": "policy.md",
+    "value": "Approved"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Retention Years",
+    "page": 1,
+    "quote": "Retention Years: 7",
+    "review_status": "pending",
+    "source_id": "policy.md",
+    "value": "7"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Exception Approval",
+    "page": 1,
+    "quote": "Exception Approval: Quality Director",
+    "review_status": "pending",
+    "source_id": "policy.md",
+    "value": "Quality Director"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Review Cycle Months",
+    "page": 1,
+    "quote": "Review Cycle Months: 6",
+    "review_status": "pending",
+    "source_id": "policy.md",
+    "value": "6"
+  },
+  {
+    "confidence": 0.6,
+    "field": "text.line[10]",
+    "page": 1,
+    "quote": "This synthetic document is for demonstration only and describes no real organization.",
+    "review_status": "pending",
+    "source_id": "policy.md",
+    "value": "This synthetic document is for demonstration only and describes no real organization."
+  },
+  {
+    "confidence": 1.0,
+    "field": "product_family",
+    "page": 1,
+    "quote": "product_family=Synthetic Device",
+    "review_status": "pending",
+    "source_id": "registry.json",
+    "value": "Synthetic Device"
+  },
+  {
+    "confidence": 1.0,
+    "field": "registry_version",
+    "page": 1,
+    "quote": "registry_version=1.1",
+    "review_status": "pending",
+    "source_id": "registry.json",
+    "value": "1.1"
+  },
+  {
+    "confidence": 1.0,
+    "field": "release.max_open_deviations",
+    "page": 1,
+    "quote": "release.max_open_deviations=3",
+    "review_status": "pending",
+    "source_id": "registry.json",
+    "value": "3"
+  },
+  {
+    "confidence": 1.0,
+    "field": "release.requires_dual_approval",
+    "page": 1,
+    "quote": "release.requires_dual_approval=true",
+    "review_status": "pending",
+    "source_id": "registry.json",
+    "value": "true"
+  },
+  {
+    "confidence": 1.0,
+    "field": "status",
+    "page": 1,
+    "quote": "status=controlled-release",
+    "review_status": "pending",
+    "source_id": "registry.json",
+    "value": "controlled-release"
+  }
+]

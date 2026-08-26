@@ -1,0 +1,74 @@
+[
+  {
+    "confidence": 0.6,
+    "field": "text.line[1]",
+    "page": 1,
+    "quote": "Synthetic Policy Extract Fixture",
+    "review_status": "pending",
+    "source_id": "synthetic-policy.pdf",
+    "value": "Synthetic Policy Extract Fixture"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Policy ID",
+    "page": 1,
+    "quote": "Policy ID: SYN-PDF-001",
+    "review_status": "pending",
+    "source_id": "synthetic-policy.pdf",
+    "value": "SYN-PDF-001"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Document Status",
+    "page": 1,
+    "quote": "Document Status: Draft",
+    "review_status": "pending",
+    "source_id": "synthetic-policy.pdf",
+    "value": "Draft"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Owner",
+    "page": 1,
+    "quote": "Owner: Quality Operations",
+    "review_status": "pending",
+    "source_id": "synthetic-policy.pdf",
+    "value": "Quality Operations"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Review Cycle Months",
+    "page": 1,
+    "quote": "Review Cycle Months: 6",
+    "review_status": "pending",
+    "source_id": "synthetic-policy.pdf",
+    "value": "6"
+  },
+  {
+    "confidence": 0.9,
+    "field": "Notice",
+    "page": 1,
+    "quote": "Notice: Synthetic test fixture. No real organization.",
+    "review_status": "pending",
+    "source_id": "synthetic-policy.pdf",
+    "value": "Synthetic test fixture. No real organization."
+  },
+  {
+    "confidence": 0.6,
+    "field": "text.line[7]",
+    "page": 1,
+    "quote": "Public synthetic input - safe for parser verification",
+    "review_status": "pending",
+    "source_id": "synthetic-policy.pdf",
+    "value": "Public synthetic input - safe for parser verification"
+  },
+  {
+    "confidence": 0.6,
+    "field": "text.line[8]",
+    "page": 1,
+    "quote": "Page 1 of 1",
+    "review_status": "pending",
+    "source_id": "synthetic-policy.pdf",
+    "value": "Page 1 of 1"
+  }
+]
