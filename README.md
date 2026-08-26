@@ -1,5 +1,7 @@
 # Regulated Workflow Demo
 
+[![tests](https://github.com/zealxz/regulated-workflow-demo/actions/workflows/tests.yml/badge.svg)](https://github.com/zealxz/regulated-workflow-demo/actions/workflows/tests.yml)
+
 Local-first Python workflows for extracting auditable evidence and reviewing controlled-document changes. Every result is a draft for human review; the project does not make compliance, legal, medical, financial, or approval decisions.
 
 The included fixtures are synthetic and describe no real organization.
