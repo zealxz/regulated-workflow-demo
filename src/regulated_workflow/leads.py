@@ -128,6 +128,7 @@ _FALSE_VALUES = {
 }
 _OUTREACH_TRUE_VALUES = {"1", "true", "yes", "y", "open", "accepting", "是", "开放", "可联系"}
 _OUTREACH_FALSE_VALUES = {"0", "false", "no", "n", "closed", "not accepting", "否", "关闭", "已关闭", "不接单"}
+_OUTREACH_UNKNOWN_VALUES = {"unknown", "未知"}
 
 
 @dataclass(frozen=True)
@@ -427,6 +428,8 @@ def _parse_accepting_outreach(value: str, row_number: int) -> Optional[bool]:
         return True
     if normalized in _OUTREACH_FALSE_VALUES:
         return False
+    if normalized in _OUTREACH_UNKNOWN_VALUES:
+        return None
     raise InputError("lead CSV row %d has invalid accepting_outreach" % row_number)
 
 

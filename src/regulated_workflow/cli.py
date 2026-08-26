@@ -7,6 +7,7 @@ from typing import Optional, Sequence
 
 from .errors import WorkflowError
 from .leads import run_lead_assistant
+from .v2ex_discovery import run_v2ex_discovery
 from .workflows import run_diff, run_extract
 
 
@@ -54,6 +55,18 @@ def build_parser() -> argparse.ArgumentParser:
             "omit when age_hours is supplied"
         ),
     )
+
+    v2ex_parser = subparsers.add_parser(
+        "v2ex-discover",
+        help="explicitly fetch one bounded public V2EX outsourcing page into lead CSV",
+    )
+    v2ex_parser.add_argument("output", type=Path, help="output CSV for the leads command")
+    v2ex_parser.add_argument(
+        "--max-topics",
+        type=int,
+        default=20,
+        help="inspect at most this many topics from the single official response (1-20)",
+    )
     return parser
 
 
@@ -70,17 +83,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 args.output_dir,
                 llm_summary=args.llm_summary,
             )
-        else:
+        elif args.command == "leads":
             paths = run_lead_assistant(
                 args.input,
                 args.output_dir,
                 as_of=args.as_of,
             )
+        else:
+            path = run_v2ex_discovery(args.output, max_topics=args.max_topics)
     except (WorkflowError, OSError) as exc:
         print("error: %s" % exc, file=sys.stderr)
         return 2
 
-    print("Generated %d local review artifacts in %s" % (len(paths), args.output_dir))
+    if args.command == "v2ex-discover":
+        print("Saved bounded public lead discovery CSV to %s" % path)
+    else:
+        print("Generated %d local review artifacts in %s" % (len(paths), args.output_dir))
     return 0
 
 

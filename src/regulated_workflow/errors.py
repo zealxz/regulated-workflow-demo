@@ -16,3 +16,7 @@ class LLMConfigurationError(WorkflowError):
 
 class LLMRequestError(WorkflowError):
     """The explicitly enabled remote adapter failed."""
+
+
+class DiscoveryError(WorkflowError):
+    """A bounded, explicitly requested public discovery read failed safely."""

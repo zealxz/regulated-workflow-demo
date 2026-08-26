@@ -16,13 +16,14 @@ The included fixtures are synthetic and describe no real organization.
 
 I offer a seven-day pilot that turns one repetitive document or data process into a client-owned, reviewable Python workflow. The first two pilots are `$149` / `¥999`: one data source, up to 20 representative documents or 500 rows, one extraction/validation/comparison flow, one structured output, one human approval point, one bounded correction round, deployment notes, and seven days of defect support.
 
-Only public, properly redacted, or synthetic samples are used for the pilot. It excludes production hosting, automatic external sending, access-control bypass, autonomous high-impact decisions, and legal, medical, financial, or compliance conclusions. Contact: [Upwork profile](https://www.upwork.com/freelancers/~017eff134da27928bc).
+Only public, properly redacted, or synthetic samples are used for the pilot. It excludes production hosting, automatic external sending, access-control bypass, autonomous high-impact decisions, and legal, medical, financial, or compliance conclusions. Contact through my [Upwork profile](https://www.upwork.com/freelancers/~017eff134da27928bc), or [open a public scope inquiry](https://github.com/zealxz/regulated-workflow-demo/issues/new?template=pilot-inquiry.yml) without confidential data.
 
 ## What It Demonstrates
 
 - `extract`: local TXT, Markdown, CSV, JSON, and optional PDF → evidence register and review queue.
 - `diff`: two local snapshots → explainable old/new changes and review priority.
 - `leads`: one manually collected public-lead CSV → transparent ranking and unsubmitted message drafts.
+- `v2ex-discover`: one explicit, bounded public V2EX read → minimized, contact-redacted lead CSV for the offline ranker.
 - Canonical JSON plus CSV, Markdown, JSONL, and formatted Excel outputs.
 - Stable source IDs, hashes, explicit offline audit events, and spreadsheet-formula-injection protection.
 - An optional OpenAI-compatible summary adapter that is disabled by default and receives aggregate counts only.
@@ -66,6 +67,8 @@ Workbook summaries are formula-backed. Evidence and review sheets have filters, 
 ```text
 regulated-workflow extract INPUT --output-dir DIR [--llm-summary]
 regulated-workflow diff OLD NEW --output-dir DIR [--llm-summary]
+regulated-workflow leads INPUT.csv --output-dir DIR [--as-of ISO-8601]
+regulated-workflow v2ex-discover OUTPUT.csv [--max-topics 1..20]
 ```
 
 Supported inputs are `.txt`, `.md`, `.csv`, `.json`, and `.pdf`. PDF support is optional:
@@ -114,6 +117,20 @@ Generated files:
 | `summary.md`, `audit.jsonl` | Rule summary and an offline/no-external-action audit record. |
 
 Review the original post and edit assumptions before manually sending a draft. Do not use this helper for authenticated scraping, auto-refreshing, bulk outreach, duplicate posting, or free customer-specific deliverables.
+
+## Bounded V2EX Discovery
+
+This optional command makes exactly one no-authenticated request to V2EX's fixed public outsourcing-node endpoint, examines at most 20 topics, and writes a CSV accepted by the offline `leads` command:
+
+```bash
+PYTHONPATH=src python3 -m regulated_workflow v2ex-discover outputs/v2ex-public.csv
+PYTHONPATH=src python3 -m regulated_workflow leads outputs/v2ex-public.csv \
+  --output-dir outputs/v2ex-ranked
+```
+
+A row is retained only when deterministic rules find relevant workflow themes and explicit buyer or paid-test intent, while rejecting seller `接单`/`承接` offers and medical, psychological, legal-advice, investment, or financial-trading topics. External links, contact channels, and opaque encoded-looking tokens are removed without decoding. The command refuses redirects, credentials, cookies, pagination, retries, reply fetching, and sending. Because replies are deliberately not fetched, `unknown` availability requires a manual check of the original topic before any outreach.
+
+First-party basis: V2EX's official [legacy topic endpoint page](https://www.v2ex.com/t/2241) documents unauthenticated `GET`; a first-party [node JSON explanation](https://www.v2ex.com/t/1187622) confirms the `node_name` form and 20-topic limitation; [API 2.0 documentation](https://www.v2ex.com/help/api) describes token access, which this project intentionally does not use.
 
 ## Optional Counts-Only LLM Draft
 
