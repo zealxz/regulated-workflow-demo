@@ -21,5 +21,5 @@ jobs:
         run: PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m unittest discover -s tests -v
       - name: Run offline demo
         run: python scripts/run_demo.py --skip-workbooks
-      - name: Verify canonical outputs
-        run: python scripts/verify_outputs.py outputs/extract outputs/diff --skip-workbooks
+      - name: Verify canonical and committed workbook outputs
+        run: python scripts/verify_outputs.py outputs/extract outputs/diff
