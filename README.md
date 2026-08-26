@@ -8,6 +8,10 @@ The included fixtures are synthetic and describe no real organization.
 
 ![Auditable evidence workflow preview](artifacts/portfolio/evidence-cover.png)
 
+[Watch the 30-second evidence demo](artifacts/portfolio/evidence-demo.mp4) · [Watch the 30-second change-review demo](artifacts/portfolio/changes-demo.mp4)
+
+![Controlled change review preview](artifacts/portfolio/changes-cover.png)
+
 ## Fixed-Scope Pilot
 
 I offer a seven-day pilot that turns one repetitive document or data process into a client-owned, reviewable Python workflow. The first two pilots are `$149` / `¥999`: one data source, up to 20 representative documents or 500 rows, one extraction/validation/comparison flow, one structured output, one human approval point, one bounded correction round, deployment notes, and seven days of defect support.
