@@ -1,0 +1,14 @@
+{
+  "name": "regulated-workflow-demo-workbook-export",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@oai/artifact-tool": ">=2.8.6"
+  },
+  "scripts": {
+    "workbook": "node scripts/build_workbooks.mjs"
+  }
+}

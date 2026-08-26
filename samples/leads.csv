@@ -1,0 +1,6 @@
+lead_id,channel,title,client_name,url,published_at,age_hours,proposals,payment_verified,accepting_outreach,description,notes
+UW-001,upwork,Auditable PDF extraction workflow,Synthetic Client,https://example.com/jobs/uw-001,,1.25,8,yes,yes,"Build a Python document processing workflow that extracts PDF fields into Excel with source evidence, validation, and a human review queue.",Synthetic example; replace with a manually collected public post.
+UW-002,upwork,RAG assistant for quality documents,Synthetic Client,https://example.com/jobs/uw-002,,3.50,12,verified,,"Create a RAG and LLM workflow for regulated quality documents with citations and API integration.",Fails the two-hour Upwork gate; outreach availability is unknown.
+VX-001,v2ex,文档表格自动整理与校验,合成需求方,https://example.com/posts/vx-001,,6.00,,,yes,"需要用 Python 把文档和 Excel 表格中的数据提取出来，保留来源并进入人工复核工作流。",Synthetic domestic example.
+PG-001,程序员客栈,知识库检索与 API 工作流,合成需求方,https://example.com/posts/pg-001,,1.00,,,,"搭建本地知识库、RAG 检索和 API 自动化，输出需要有引用和校验状态。",Synthetic domestic example; outreach availability is unknown.
+PUBLIC-001,public,General website styling,Synthetic Client,https://example.com/posts/public-001,,0.50,,,closed,"Adjust colors and spacing on a marketing page.",Does not match the document workflow demo; explicitly closed.

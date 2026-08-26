@@ -1,0 +1,118 @@
+{
+  "format": "1000x750 PNG, 4:3",
+  "content": "Deterministic compositions of verified workbook renders and exact demonstrated counts.",
+  "sources": [
+    {
+      "path": "artifacts/verification/changes/changes-audit.png",
+      "sha256": "392604b94f9497a39cbf3011e5c4edf687f17d24a156fbb3f2d8a49c55fa0e05"
+    },
+    {
+      "path": "artifacts/verification/changes/changes-changes.png",
+      "sha256": "6e446ce6f97f623ac7f6a6bb350b4a534ed314d2f3bae1570f57319ced004299"
+    },
+    {
+      "path": "artifacts/verification/changes/changes-review-queue.png",
+      "sha256": "6bc4242c29e78943f828a4e0bd495f5726cea4e79a8ce4469a935ccc233ee094"
+    },
+    {
+      "path": "artifacts/verification/changes/changes-summary.png",
+      "sha256": "b10b02448e05315edfadbfb4afd9347c1445d0db77f05d4562b2f83e18c462c9"
+    },
+    {
+      "path": "artifacts/verification/evidence/evidence-audit.png",
+      "sha256": "60f9ba39e72392aaa604f88067860507265410a0702b64944565c87fde874761"
+    },
+    {
+      "path": "artifacts/verification/evidence/evidence-evidence.png",
+      "sha256": "d7415f883443e639c7bc4d3ba5aeaf02d36d318344d9541ed86e83aea864bcf9"
+    },
+    {
+      "path": "artifacts/verification/evidence/evidence-review-queue.png",
+      "sha256": "46fcc0a5ed6e1721de5e6d8b62687c7d569b8d38a22f31133864805ba1b31775"
+    },
+    {
+      "path": "artifacts/verification/evidence/evidence-summary.png",
+      "sha256": "bbac53162bb95fb60c38b7d99520cf09372d286913bb088eb0473bef9f3bd7f7"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "artifacts/portfolio/changes-audit.png",
+      "sha256": "ef83dda21d251d894cdf10dbf5cc962e4fe16caf2db2d12bf933483e7f50fb5b"
+    },
+    {
+      "path": "artifacts/portfolio/changes-boundary.png",
+      "sha256": "940d6d2fc2f8ebf36565de1aae28c7cf54555a959a59de5427ce2e4830a240f6"
+    },
+    {
+      "path": "artifacts/portfolio/changes-closing.png",
+      "sha256": "2dbe06d1ba5b64d6cf7056cc37db13ffd6ac3d5b74ca4cd3f158356c1f987615"
+    },
+    {
+      "path": "artifacts/portfolio/changes-cover.png",
+      "sha256": "de336a2b0bd95486d793b6f53640397a990ccee9abf69b555f920380b5beb1dc"
+    },
+    {
+      "path": "artifacts/portfolio/changes-register.png",
+      "sha256": "f9824a747e5aee497b2ccbf8599438dea9090b3b7ce256d915d42b24e8547c57"
+    },
+    {
+      "path": "artifacts/portfolio/changes-review.png",
+      "sha256": "9445c33a962f9cd9f577e9e90a3a7e38dac7157303fc8d5627f808373544a1f9"
+    },
+    {
+      "path": "artifacts/portfolio/evidence-audit.png",
+      "sha256": "99a02810a5c22a87a6d7e2b579c53bf80ece20a5a594485ae0d81930ed180012"
+    },
+    {
+      "path": "artifacts/portfolio/evidence-boundary.png",
+      "sha256": "7e2fe38559cc5c276b60260b0a660423b289def4ff4fb6ee33dca12a75708e33"
+    },
+    {
+      "path": "artifacts/portfolio/evidence-closing.png",
+      "sha256": "2dbe06d1ba5b64d6cf7056cc37db13ffd6ac3d5b74ca4cd3f158356c1f987615"
+    },
+    {
+      "path": "artifacts/portfolio/evidence-cover.png",
+      "sha256": "ed9c7d5b46080c3d4a0f830506b0321897180414aeff047a2f7bf9b99fce2fe9"
+    },
+    {
+      "path": "artifacts/portfolio/evidence-register.png",
+      "sha256": "b708ec4a861d1544b5906e632a34747c69b6325591aac72f48f1fa4238f1dc55"
+    },
+    {
+      "path": "artifacts/portfolio/evidence-review.png",
+      "sha256": "105f485ad13cb861be0dce323773a8d01a02b59c39825fdfefc8a377bad46925"
+    }
+  ],
+  "video_frames": {
+    "evidence": [
+      "artifacts/video-frames/evidence/01.png",
+      "artifacts/video-frames/evidence/02.png",
+      "artifacts/video-frames/evidence/03.png",
+      "artifacts/video-frames/evidence/04.png",
+      "artifacts/video-frames/evidence/05.png",
+      "artifacts/video-frames/evidence/06.png"
+    ],
+    "changes": [
+      "artifacts/video-frames/changes/01.png",
+      "artifacts/video-frames/changes/02.png",
+      "artifacts/video-frames/changes/03.png",
+      "artifacts/video-frames/changes/04.png",
+      "artifacts/video-frames/changes/05.png",
+      "artifacts/video-frames/changes/06.png"
+    ]
+  },
+  "videos": [
+    {
+      "path": "artifacts/portfolio/changes-demo.mp4",
+      "sha256": "d79065cb36e9efcff5502ef37069268d3c04187b9889e4f28b3bd32b31096f64",
+      "format": "H.264 MP4, 1000x750, 30 seconds"
+    },
+    {
+      "path": "artifacts/portfolio/evidence-demo.mp4",
+      "sha256": "71b0eacd5594a42e6ab93220c68d3126c58ffe99b66ef1c8fd39e49000440411",
+      "format": "H.264 MP4, 1000x750, 30 seconds"
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+Control ID,Control Name,Threshold,Owner,Status
+CTL-001,Temperature excursion,8 hours,Quality Operations,Active
+CTL-002,Deviation backlog,10 cases,Quality Systems,Active

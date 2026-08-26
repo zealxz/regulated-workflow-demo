@@ -1,0 +1,3 @@
+Incident Escalation Hours: 12
+Log Retention Days: 180
+Final Approval Role: Quality Director

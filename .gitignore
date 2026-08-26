@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+node_modules/
+.DS_Store
+outputs/*
+!outputs/.gitkeep
+artifacts/tmp/
+artifacts/verification/
+artifacts/video-frames/
+*.log
+.env
+.env.*
+!.env.example

@@ -1,0 +1,9 @@
+{
+  "product_family": "Synthetic Device",
+  "registry_version": "1.0",
+  "release": {
+    "max_open_deviations": 5,
+    "requires_dual_approval": false
+  },
+  "status": "pilot"
+}
