@@ -17,7 +17,7 @@ The pilot also includes one bounded correction round, deployment notes, and seve
 
 [Inspect verified sample outputs](#verified-sample-outputs) · [Watch the 30-second evidence demo](artifacts/portfolio/evidence-demo.mp4) · [Watch the 30-second change-review demo](artifacts/portfolio/changes-demo.mp4)
 
-**Contact:** [private scoping through Upwork](https://www.upwork.com/freelancers/~017eff134da27928bc) · [public scope inquiry](https://github.com/zealxz/regulated-workflow-demo/issues/new?template=pilot-inquiry.yml) (do not include confidential data)
+**Contact:** [purchase or scope the pilot through Upwork](https://www.upwork.com/services/product/development-it-a-7-day-auditable-document-workflow-automation-sprint-2092293814461481436) · [public scope inquiry](https://github.com/zealxz/regulated-workflow-demo/issues/new?template=pilot-inquiry.yml) (do not include confidential data)
 
 **Safety boundary:** only public, properly redacted, or synthetic samples are used. The pilot excludes production hosting, automatic external sending, access-control bypass, autonomous high-impact decisions, and legal, medical, financial, compliance, or approval conclusions.
 
@@ -25,7 +25,7 @@ The pilot also includes one bounded correction round, deployment notes, and seve
 
 把 PDF、表格和版本文档转成带来源定位的证据台账、差异清单与人工复核队列。首两单为 7 日固定范围试点，价格 `¥999`：最多 20 份文档或 500 行、一个流程、一个结构化输出、一个人工审批点、一次限定修正和 7 天缺陷支持。演示全部使用合成数据，不冒充客户案例，不作合规结论。
 
-[查看可下载样例](#verified-sample-outputs) · [通过 Upwork 私下沟通](https://www.upwork.com/freelancers/~017eff134da27928bc) · [公开咨询](https://github.com/zealxz/regulated-workflow-demo/issues/new?template=pilot-inquiry.yml)
+[查看可下载样例](#verified-sample-outputs) · [通过 Upwork 购买或沟通](https://www.upwork.com/services/product/development-it-a-7-day-auditable-document-workflow-automation-sprint-2092293814461481436) · [公开咨询](https://github.com/zealxz/regulated-workflow-demo/issues/new?template=pilot-inquiry.yml)
 
 ![Auditable evidence workflow preview](artifacts/portfolio/evidence-cover.png)
 
